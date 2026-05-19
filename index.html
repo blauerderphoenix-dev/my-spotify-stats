@@ -372,6 +372,78 @@
   }
 
   .badge.lfm  { border-color: var(--accent2); color: var(--accent2); }
+
+  /* GENRE LIST */
+  .genre-item {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    padding: 9px 0;
+    gap: 0;
+  }
+
+  .genre-item:last-child { border-bottom: none; }
+
+  .genre-name {
+    flex: 0 0 200px;
+    color: var(--text);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 16px;
+  }
+
+  .genre-bar-wrap {
+    flex: 1;
+    background: var(--line);
+    height: 2px;
+    margin-right: 16px;
+  }
+
+  .genre-bar {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    min-width: 2px;
+  }
+
+  .genre-score {
+    color: var(--dim);
+    font-size: 10px;
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* SECTION TABS */
+  .section-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-tab {
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 22px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    border-radius: 0;
+    margin-bottom: -1px;
+    color: var(--dim);
+  }
+
+  .section-tab.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  .section-tab:hover {
+    color: var(--text);
+    border-bottom-color: var(--dim);
+  }
   .badge.imp  { border-color: #e5a000;        color: #e5a000; }
 
   ::-webkit-scrollbar { width: 4px; }
@@ -425,19 +497,31 @@
     <!-- SPOTIFY TAB -->
     <div id="spotify-section">
       <div class="filter-bar">
-        <button class="active" onclick="setRange('short_term', this)">4 Wochen</button>
-        <button onclick="setRange('medium_term', this)">6 Monate</button>
+        <button class="active" onclick="setRange('short_term', this)">1 Woche</button>
+        <button onclick="setRange('medium_term', this)">1 Monat</button>
+        <button onclick="setRange('long_term', this)">1 Jahr</button>
         <button onclick="setRange('long_term', this)">All Time</button>
       </div>
 
-      <div class="section">
-        <div class="section-header">Top Tracks</div>
+      <div class="section-tabs">
+        <button class="section-tab active" onclick="switchSection('tracks', this)">Songs</button>
+        <button class="section-tab" onclick="switchSection('artists', this)">Künstler</button>
+        <button class="section-tab" onclick="switchSection('genres', this)">Genres</button>
+      </div>
+
+      <div id="section-tracks" class="section">
+        <div class="section-header">Top Songs</div>
         <ul class="track-list" id="tracks-list"></ul>
       </div>
 
-      <div class="section">
-        <div class="section-header">Top Artists</div>
+      <div id="section-artists" class="section" style="display:none">
+        <div class="section-header">Top Künstler</div>
         <ul class="artist-list" id="artists-list"></ul>
+      </div>
+
+      <div id="section-genres" class="section" style="display:none">
+        <div class="section-header">Top Genres</div>
+        <ul class="track-list" id="genres-list"></ul>
       </div>
     </div>
 
@@ -634,6 +718,7 @@ async function loadAll() {
     document.getElementById('user-info').textContent = me.display_name || me.id;
     renderTracks(tracks.items);
     renderArtists(artists.items);
+    renderGenres(artists.items);
     setStatus('');
   } catch(e) { setStatus(''); showError(e.message); }
 }
@@ -732,6 +817,33 @@ function renderArtists(items) {
     </li>`).join('');
 }
 
+function renderGenres(artistItems) {
+  const list = document.getElementById('genres-list');
+  if (!artistItems || !artistItems.length) { list.innerHTML = emptyRow(); return; }
+  // Count genre occurrences weighted by artist rank (top artist = most weight)
+  const genreCounts = {};
+  artistItems.forEach((a, i) => {
+    const weight = artistItems.length - i; // higher rank = more weight
+    (a.genres || []).forEach(g => {
+      genreCounts[g] = (genreCounts[g] || 0) + weight;
+    });
+  });
+  const sorted = Object.entries(genreCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 50);
+  if (!sorted.length) { list.innerHTML = emptyRow(); return; }
+  const max = sorted[0][1];
+  list.innerHTML = sorted.map(([genre, score], i) => {
+    const pct = Math.round((score / max) * 100);
+    return `<li class="genre-item">
+      <span class="rank">${pad(i+1)}</span>
+      <span class="genre-name">${esc(genre)}</span>
+      <span class="genre-bar-wrap"><span class="genre-bar" style="width:${pct}%"></span></span>
+      <span class="genre-score">${score}</span>
+    </li>`;
+  }).join('');
+}
+
 function renderLfmTracks(items) {
   const list = document.getElementById('lfm-tracks-list');
   if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
@@ -795,6 +907,14 @@ function switchTab(tab, btn) {
       !document.getElementById('lfm-tracks-list').innerHTML) {
     loadLastfm();
   }
+}
+
+function switchSection(section, btn) {
+  document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('section-tracks').style.display  = section === 'tracks'  ? 'block' : 'none';
+  document.getElementById('section-artists').style.display = section === 'artists' ? 'block' : 'none';
+  document.getElementById('section-genres').style.display  = section === 'genres'  ? 'block' : 'none';
 }
 
 function setRange(range, btn) {
