@@ -13,6 +13,7 @@
     --mid: #888888;
     --text: #e8e8e8;
     --accent: #1DB954;
+    --accent2: #d51007;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,12 +28,11 @@
   }
 
   #app {
-    max-width: 860px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 40px 24px 80px;
   }
 
-  /* HEADER */
   header {
     border-bottom: 1px solid var(--line);
     padding-bottom: 20px;
@@ -55,6 +55,7 @@
     display: flex;
     gap: 12px;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   #user-info {
@@ -63,7 +64,6 @@
     letter-spacing: 0.05em;
   }
 
-  /* BUTTONS */
   button {
     background: none;
     border: 1px solid var(--dim);
@@ -74,7 +74,7 @@
     text-transform: uppercase;
     padding: 6px 14px;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
   }
 
   button:hover {
@@ -95,7 +95,7 @@
     color: #000;
   }
 
-  /* LOGIN SCREEN */
+  /* LOGIN */
   #login-screen {
     display: flex;
     flex-direction: column;
@@ -109,9 +109,10 @@
     color: var(--dim);
     letter-spacing: 0.15em;
     text-transform: uppercase;
+    margin-bottom: 10px;
   }
 
-  #client-id-input {
+  input[type="text"] {
     background: var(--bg2);
     border: 1px solid var(--line);
     color: var(--text);
@@ -124,18 +125,13 @@
     letter-spacing: 0.05em;
   }
 
-  #client-id-input:focus {
-    border-color: var(--dim);
-  }
-
-  #client-id-input::placeholder {
-    color: var(--dim);
-  }
+  input[type="text"]:focus { border-color: var(--dim); }
+  input[type="text"]::placeholder { color: var(--dim); }
 
   .redirect-note {
     font-size: 11px;
     color: var(--dim);
-    max-width: 400px;
+    max-width: 440px;
     line-height: 1.8;
   }
 
@@ -145,10 +141,33 @@
     padding: 1px 5px;
   }
 
-  /* MAIN CONTENT */
+  /* MAIN */
   #main-content { display: none; }
 
-  /* TIME FILTER */
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tab-bar button {
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 20px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    border-radius: 0;
+    margin-bottom: -1px;
+  }
+
+  .tab-bar button.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  /* FILTER */
   .filter-bar {
     display: flex;
     gap: 0;
@@ -166,14 +185,11 @@
     border-radius: 0;
   }
 
-  .filter-bar button:last-child {
-    border-right: none;
-  }
+  .filter-bar button:last-child { border-right: none; }
 
   .filter-bar button.active {
     background: var(--text);
     color: #000;
-    border-color: var(--text);
   }
 
   .filter-bar button.active:hover {
@@ -182,36 +198,30 @@
   }
 
   /* SECTIONS */
-  .section {
-    margin-bottom: 52px;
-  }
+  .section { margin-bottom: 52px; }
 
   .section-header {
     font-size: 10px;
     letter-spacing: 0.3em;
     color: var(--dim);
     text-transform: uppercase;
-    margin-bottom: 2px;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--line);
+    margin-bottom: 2px;
   }
 
-  /* LIST */
-  .track-list, .artist-list {
-    list-style: none;
-  }
+  /* LISTS */
+  .track-list, .artist-list { list-style: none; }
 
   .track-item, .artist-item {
     display: flex;
     align-items: baseline;
-    gap: 0;
     border-bottom: 1px solid var(--line);
     padding: 10px 0;
+    gap: 0;
   }
 
-  .track-item:last-child, .artist-item:last-child {
-    border-bottom: none;
-  }
+  .track-item:last-child, .artist-item:last-child { border-bottom: none; }
 
   .rank {
     width: 36px;
@@ -239,8 +249,21 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 200px;
+    max-width: 180px;
+    padding-right: 16px;
   }
+
+  .play-count {
+    color: var(--accent);
+    font-size: 11px;
+    flex-shrink: 0;
+    text-align: right;
+    min-width: 60px;
+    letter-spacing: 0.05em;
+  }
+
+  .play-count.lastfm { color: var(--accent2); }
+  .play-count.none   { color: var(--dim); }
 
   .artist-name {
     flex: 1;
@@ -248,19 +271,68 @@
     font-size: 13px;
   }
 
-  .artist-genres {
+  .artist-meta {
     color: var(--dim);
     font-size: 10px;
-    letter-spacing: 0.05em;
     flex-shrink: 0;
-    max-width: 260px;
+    max-width: 240px;
     text-align: right;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-right: 16px;
   }
 
-  /* STATUS */
+  /* LAST.FM TAB */
+  #lastfm-section { display: none; }
+
+  .lfm-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .lfm-input-row input { width: 220px; }
+
+  /* IMPORT TAB */
+  #import-section { display: none; }
+
+  .import-zone {
+    border: 1px dashed var(--dim);
+    padding: 32px 24px;
+    margin-bottom: 24px;
+    max-width: 480px;
+  }
+
+  .import-zone p {
+    color: var(--mid);
+    font-size: 11px;
+    line-height: 1.9;
+  }
+
+  .import-zone code {
+    color: var(--text);
+    background: var(--bg2);
+    padding: 1px 5px;
+  }
+
+  #file-input { display: none; }
+
+  .import-stats {
+    font-size: 11px;
+    color: var(--mid);
+    margin-bottom: 24px;
+    line-height: 2;
+    border: 1px solid var(--line);
+    padding: 14px 18px;
+    max-width: 480px;
+  }
+
+  .import-stats span { color: var(--text); }
+
+  /* STATUS / ERROR */
   #status {
     font-size: 11px;
     color: var(--dim);
@@ -270,16 +342,14 @@
   }
 
   .loading-text {
-    color: var(--dim);
     animation: blink 1s step-end infinite;
   }
 
   @keyframes blink {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.2; }
+    50%       { opacity: 0.2; }
   }
 
-  /* ERROR */
   .error-msg {
     color: #e05555;
     font-size: 11px;
@@ -289,15 +359,26 @@
     background: #160808;
   }
 
-  /* SCROLLBAR */
+  .badge {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    border: 1px solid var(--dim);
+    color: var(--dim);
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+
+  .badge.lfm  { border-color: var(--accent2); color: var(--accent2); }
+  .badge.imp  { border-color: #e5a000;        color: #e5a000; }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--line); }
 
   @media (max-width: 560px) {
-    .track-artist { max-width: 120px; }
-    .artist-genres { max-width: 140px; }
-    #client-id-input { width: 100%; }
+    .track-artist { max-width: 100px; }
+    input[type="text"] { width: 100%; }
   }
 </style>
 </head>
@@ -308,28 +389,22 @@
     <span class="site-title">Spotify Stats</span>
     <div class="header-right">
       <span id="user-info"></span>
-      <button id="refresh-btn" style="display:none" onclick="loadAll()">Refresh</button>
-      <button id="logout-btn" style="display:none" onclick="logout()">Logout</button>
+      <button id="refresh-btn" style="display:none" onclick="onRefresh()">Refresh</button>
+      <button id="logout-btn"  style="display:none" onclick="logout()">Logout</button>
     </div>
   </header>
 
   <!-- LOGIN -->
   <div id="login-screen">
     <div>
-      <div class="login-label" style="margin-bottom:10px">Client ID</div>
-      <input
-        id="client-id-input"
-        type="text"
-        placeholder="Deine Spotify App Client ID"
-        autocomplete="off"
-        spellcheck="false"
-      />
+      <div class="login-label">Spotify Client ID</div>
+      <input id="client-id-input" type="text" placeholder="Deine Spotify App Client ID" autocomplete="off" spellcheck="false"/>
     </div>
     <button id="login-btn" onclick="startLogin()">Login with Spotify</button>
     <div class="redirect-note">
-      Redirect URI in deiner Spotify App eintragen:<br>
+      Redirect URI in der Spotify App eintragen:<br>
       <code id="redirect-uri-display"></code><br><br>
-      Benötigte Scopes: <code>user-top-read</code>
+      Benötigte Scopes: <code>user-top-read user-read-private</code>
     </div>
   </div>
 
@@ -338,315 +413,430 @@
     <div id="error-container"></div>
     <div id="status"></div>
 
-    <div class="filter-bar">
-      <button class="active" onclick="setRange('short_term', this)">4 Wochen</button>
-      <button onclick="setRange('medium_term', this)">6 Monate</button>
-      <button onclick="setRange('long_term', this)">All Time</button>
+    <!-- TABS -->
+    <div class="tab-bar">
+      <button class="active" onclick="switchTab('spotify', this)">Spotify Top</button>
+      <button onclick="switchTab('lastfm', this)">Last.fm Counts</button>
+      <button onclick="switchTab('import', this)">Import Export</button>
     </div>
 
-    <div class="section">
-      <div class="section-header">Top Tracks</div>
-      <ul class="track-list" id="tracks-list"></ul>
+    <!-- SPOTIFY TAB -->
+    <div id="spotify-section">
+      <div class="filter-bar">
+        <button class="active" onclick="setRange('short_term', this)">4 Wochen</button>
+        <button onclick="setRange('medium_term', this)">6 Monate</button>
+        <button onclick="setRange('long_term', this)">All Time</button>
+      </div>
+
+      <div class="section">
+        <div class="section-header">Top Tracks</div>
+        <ul class="track-list" id="tracks-list"></ul>
+      </div>
+
+      <div class="section">
+        <div class="section-header">Top Artists</div>
+        <ul class="artist-list" id="artists-list"></ul>
+      </div>
     </div>
 
-    <div class="section">
-      <div class="section-header">Top Artists</div>
-      <ul class="artist-list" id="artists-list"></ul>
+    <!-- LAST.FM TAB -->
+    <div id="lastfm-section">
+      <div class="lfm-input-row">
+        <input id="lfm-username" type="text" placeholder="Last.fm Username" spellcheck="false"/>
+        <button onclick="loadLastfm()">Laden</button>
+      </div>
+      <div class="section">
+        <div class="section-header">Top Tracks — Last.fm <span class="badge lfm">LAST.FM</span></div>
+        <ul class="track-list" id="lfm-tracks-list"></ul>
+      </div>
+      <div class="section">
+        <div class="section-header">Top Artists — Last.fm <span class="badge lfm">LAST.FM</span></div>
+        <ul class="artist-list" id="lfm-artists-list"></ul>
+      </div>
+    </div>
+
+    <!-- IMPORT TAB -->
+    <div id="import-section">
+      <div class="import-zone">
+        <p>
+          Spotify-Verlaufsdaten importieren:<br><br>
+          1. <code>spotify.com/account</code> → Datenschutz<br>
+          2. „Erweiterte Streaming-Daten anfordern"<br>
+          3. Warten (~30 Tage), dann ZIP erhalten<br>
+          4. JSON-Dateien hier hochladen (<code>Streaming_History_Audio_*.json</code>)
+        </p>
+      </div>
+      <button onclick="document.getElementById('file-input').click()">JSON-Dateien auswählen</button>
+      <input type="file" id="file-input" accept=".json" multiple onchange="handleImport(this.files)"/>
+      <div id="import-stats" class="import-stats" style="display:none"></div>
+      <div class="section" style="margin-top:24px">
+        <div class="section-header">Top Tracks — Import <span class="badge imp">IMPORT</span></div>
+        <ul class="track-list" id="import-tracks-list"></ul>
+      </div>
+      <div class="section">
+        <div class="section-header">Top Artists — Import <span class="badge imp">IMPORT</span></div>
+        <ul class="artist-list" id="import-artists-list"></ul>
+      </div>
     </div>
   </div>
 
 </div>
-
 <script>
-  // ── CONFIG ──────────────────────────────────────────────────────────────────
-  const REDIRECT_URI = window.location.origin + window.location.pathname;
-  const SCOPES       = 'user-top-read user-read-private';
-  const API          = 'https://api.spotify.com/v1';
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
+const REDIRECT_URI  = window.location.origin + window.location.pathname;
+const SCOPES        = 'user-top-read user-read-private';
+const API           = 'https://api.spotify.com/v1';
+const LFM_KEY       = '0c6c1bcb14dad55db8b608031ac09521';
+const LFM_API       = 'https://ws.audioscrobbler.com/2.0/';
 
-  let currentRange = 'short_term';
+let currentRange = 'short_term';
+let currentTab   = 'spotify';
 
-  // ── DOM READY ───────────────────────────────────────────────────────────────
-  document.getElementById('redirect-uri-display').textContent = REDIRECT_URI;
+// ── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('redirect-uri-display').textContent = REDIRECT_URI;
+const savedClientId = localStorage.getItem('sp_client_id');
+if (savedClientId) document.getElementById('client-id-input').value = savedClientId;
 
-  const savedClientId = localStorage.getItem('sp_client_id');
-  if (savedClientId) document.getElementById('client-id-input').value = savedClientId;
+const savedLfmUser = localStorage.getItem('lfm_username');
+if (savedLfmUser) document.getElementById('lfm-username').value = savedLfmUser;
 
-  // ── PKCE HELPERS ─────────────────────────────────────────────────────────────
-  function randomBytes(n) {
-    const arr = new Uint8Array(n);
-    crypto.getRandomValues(arr);
-    return arr;
+(async function init() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('code') || params.get('error')) { await handleCallback(); return; }
+
+  const token  = localStorage.getItem('sp_access_token');
+  const expAt  = Number(localStorage.getItem('sp_expires_at') || 0);
+
+  if (token && Date.now() < expAt) {
+    showApp(); await loadAll();
+  } else if (token && localStorage.getItem('sp_refresh_token')) {
+    const ok = await refreshToken();
+    if (ok) { showApp(); await loadAll(); } else showLogin();
+  } else {
+    showLogin();
   }
+})();
 
-  function base64urlEncode(buf) {
-    return btoa(String.fromCharCode(...buf))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  }
+// ── PKCE ─────────────────────────────────────────────────────────────────────
+function b64url(buf) {
+  return btoa(String.fromCharCode(...buf)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+async function pkceChallenge() {
+  const v = b64url(crypto.getRandomValues(new Uint8Array(32)));
+  const h = b64url(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v))));
+  return { verifier: v, challenge: h };
+}
 
-  async function sha256(plain) {
-    const enc = new TextEncoder().encode(plain);
-    const hash = await crypto.subtle.digest('SHA-256', enc);
-    return new Uint8Array(hash);
-  }
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+async function startLogin() {
+  const clientId = document.getElementById('client-id-input').value.trim();
+  if (!clientId) { showError('Bitte Client ID eingeben.'); return; }
+  localStorage.setItem('sp_client_id', clientId);
+  const { verifier, challenge } = await pkceChallenge();
+  const state = b64url(crypto.getRandomValues(new Uint8Array(8)));
+  localStorage.setItem('sp_verifier', verifier);
+  localStorage.setItem('sp_state', state);
+  const url = new URL('https://accounts.spotify.com/authorize');
+  url.searchParams.set('client_id', clientId);
+  url.searchParams.set('response_type', 'code');
+  url.searchParams.set('redirect_uri', REDIRECT_URI);
+  url.searchParams.set('state', state);
+  url.searchParams.set('scope', SCOPES);
+  url.searchParams.set('code_challenge_method', 'S256');
+  url.searchParams.set('code_challenge', challenge);
+  window.location.href = url.toString();
+}
 
-  async function pkceChallenge() {
-    const verifier  = base64urlEncode(randomBytes(32));
-    const challenge = base64urlEncode(await sha256(verifier));
-    return { verifier, challenge };
-  }
-
-  // ── AUTH FLOW ────────────────────────────────────────────────────────────────
-  async function startLogin() {
-    const clientId = document.getElementById('client-id-input').value.trim();
-    if (!clientId) { showError('Bitte Client ID eingeben.'); return; }
-    localStorage.setItem('sp_client_id', clientId);
-
-    const { verifier, challenge } = await pkceChallenge();
-    localStorage.setItem('sp_verifier', verifier);
-
-    const state = base64urlEncode(randomBytes(8));
-    localStorage.setItem('sp_state', state);
-
-    const url = new URL('https://accounts.spotify.com/authorize');
-    url.searchParams.set('client_id',             clientId);
-    url.searchParams.set('response_type',         'code');
-    url.searchParams.set('redirect_uri',          REDIRECT_URI);
-    url.searchParams.set('state',                 state);
-    url.searchParams.set('scope',                 SCOPES);
-    url.searchParams.set('code_challenge_method', 'S256');
-    url.searchParams.set('code_challenge',        challenge);
-
-    window.location.href = url.toString();
-  }
-
-  async function handleCallback() {
-    const params   = new URLSearchParams(window.location.search);
-    const code     = params.get('code');
-    const state    = params.get('state');
-    const error    = params.get('error');
-
-    // Clean URL
-    history.replaceState({}, '', window.location.pathname);
-
-    if (error) { showError('Spotify Fehler: ' + error); return; }
-    if (!code)  return;
-
-    const savedState = localStorage.getItem('sp_state');
-    if (state !== savedState) { showError('State mismatch – möglicher CSRF.'); return; }
-
-    const clientId = localStorage.getItem('sp_client_id');
-    const verifier = localStorage.getItem('sp_verifier');
-
-    setStatus('Lade Access Token…');
-    try {
-      const resp = await fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id:     clientId,
-          grant_type:    'authorization_code',
-          code,
-          redirect_uri:  REDIRECT_URI,
-          code_verifier: verifier,
-        }),
-      });
-      if (!resp.ok) throw new Error('Token-Anfrage fehlgeschlagen: ' + resp.status);
-      const data = await resp.json();
-
-      localStorage.setItem('sp_access_token',  data.access_token);
-      localStorage.setItem('sp_refresh_token', data.refresh_token || '');
-      localStorage.setItem('sp_expires_at',    Date.now() + (data.expires_in - 60) * 1000);
-
-      localStorage.removeItem('sp_verifier');
-      localStorage.removeItem('sp_state');
-
-      showApp();
-      await loadAll();
-    } catch (e) {
-      showError(e.message);
-    }
-  }
-
-  async function refreshToken() {
-    const clientId = localStorage.getItem('sp_client_id');
-    const rt       = localStorage.getItem('sp_refresh_token');
-    if (!rt) { logout(); return false; }
-
+async function handleCallback() {
+  const params = new URLSearchParams(window.location.search);
+  history.replaceState({}, '', window.location.pathname);
+  if (params.get('error')) { showError('Spotify Fehler: ' + params.get('error')); return; }
+  const code = params.get('code');
+  if (!code) return;
+  if (params.get('state') !== localStorage.getItem('sp_state')) { showError('State mismatch.'); return; }
+  setStatus('Lade Access Token…');
+  try {
     const resp = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id:     clientId,
-        grant_type:    'refresh_token',
-        refresh_token: rt,
+        client_id: localStorage.getItem('sp_client_id'),
+        grant_type: 'authorization_code',
+        code, redirect_uri: REDIRECT_URI,
+        code_verifier: localStorage.getItem('sp_verifier'),
       }),
     });
-
-    if (!resp.ok) { logout(); return false; }
+    if (!resp.ok) throw new Error('Token-Anfrage fehlgeschlagen: ' + resp.status);
     const data = await resp.json();
+    saveToken(data);
+    localStorage.removeItem('sp_verifier');
+    localStorage.removeItem('sp_state');
+    showApp(); await loadAll();
+  } catch(e) { showError(e.message); }
+}
 
-    localStorage.setItem('sp_access_token', data.access_token);
-    localStorage.setItem('sp_expires_at',   Date.now() + (data.expires_in - 60) * 1000);
-    if (data.refresh_token) localStorage.setItem('sp_refresh_token', data.refresh_token);
-    return true;
+function saveToken(data) {
+  localStorage.setItem('sp_access_token',  data.access_token);
+  localStorage.setItem('sp_refresh_token', data.refresh_token || localStorage.getItem('sp_refresh_token') || '');
+  localStorage.setItem('sp_expires_at',    Date.now() + (data.expires_in - 60) * 1000);
+}
+
+async function refreshToken() {
+  const rt = localStorage.getItem('sp_refresh_token');
+  if (!rt) { logout(); return false; }
+  const resp = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: localStorage.getItem('sp_client_id'), grant_type: 'refresh_token', refresh_token: rt }),
+  });
+  if (!resp.ok) { logout(); return false; }
+  saveToken(await resp.json());
+  return true;
+}
+
+async function getToken() {
+  if (Date.now() > Number(localStorage.getItem('sp_expires_at') || 0)) {
+    const ok = await refreshToken();
+    if (!ok) return null;
   }
+  return localStorage.getItem('sp_access_token');
+}
 
-  async function getToken() {
-    const expiresAt = Number(localStorage.getItem('sp_expires_at') || 0);
-    if (Date.now() > expiresAt) {
-      const ok = await refreshToken();
-      if (!ok) return null;
-    }
-    return localStorage.getItem('sp_access_token');
+function logout() {
+  ['sp_access_token','sp_refresh_token','sp_expires_at','sp_verifier','sp_state'].forEach(k => localStorage.removeItem(k));
+  showLogin();
+}
+
+// ── SPOTIFY API ───────────────────────────────────────────────────────────────
+async function apiFetch(endpoint) {
+  const token = await getToken();
+  if (!token) throw new Error('Kein gültiger Token.');
+  const resp = await fetch(API + endpoint, { headers: { Authorization: 'Bearer ' + token } });
+  if (resp.status === 401) {
+    const ok = await refreshToken();
+    if (!ok) throw new Error('Token abgelaufen.');
+    return apiFetch(endpoint);
   }
+  if (!resp.ok) throw new Error('API Fehler ' + resp.status);
+  return resp.json();
+}
 
-  function logout() {
-    ['sp_access_token','sp_refresh_token','sp_expires_at','sp_verifier','sp_state']
-      .forEach(k => localStorage.removeItem(k));
-    showLogin();
-  }
+async function loadAll() {
+  clearError(); setStatus('Lade Spotify-Daten…');
+  try {
+    const [me, tracks, artists] = await Promise.all([
+      apiFetch('/me'),
+      apiFetch(`/me/top/tracks?limit=50&time_range=${currentRange}`),
+      apiFetch(`/me/top/artists?limit=50&time_range=${currentRange}`),
+    ]);
+    document.getElementById('user-info').textContent = me.display_name || me.id;
+    renderTracks(tracks.items);
+    renderArtists(artists.items);
+    setStatus('');
+  } catch(e) { setStatus(''); showError(e.message); }
+}
 
-  // ── API CALLS ────────────────────────────────────────────────────────────────
-  async function apiFetch(endpoint) {
-    const token = await getToken();
-    if (!token) throw new Error('Kein gültiger Token.');
+// ── LAST.FM API ───────────────────────────────────────────────────────────────
+async function loadLastfm() {
+  const user = document.getElementById('lfm-username').value.trim();
+  if (!user) { showError('Last.fm Username eingeben.'); return; }
+  localStorage.setItem('lfm_username', user);
+  clearError(); setStatus('Lade Last.fm-Daten…');
+  try {
+    const [tracks, artists] = await Promise.all([
+      lfmFetch('user.gettoptracks', user, 50),
+      lfmFetch('user.gettopartists', user, 50),
+    ]);
+    renderLfmTracks(tracks.toptracks.track);
+    renderLfmArtists(artists.topartists.artist);
+    setStatus('');
+  } catch(e) { setStatus(''); showError('Last.fm: ' + e.message); }
+}
 
-    const resp = await fetch(API + endpoint, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+async function lfmFetch(method, user, limit) {
+  const url = `${LFM_API}?method=${method}&user=${encodeURIComponent(user)}&api_key=${LFM_KEY}&format=json&limit=${limit}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  const data = await resp.json();
+  if (data.error) throw new Error(data.message);
+  return data;
+}
 
-    if (resp.status === 401) {
-      const ok = await refreshToken();
-      if (!ok) throw new Error('Token abgelaufen. Bitte erneut einloggen.');
-      return apiFetch(endpoint);
-    }
+// ── IMPORT ────────────────────────────────────────────────────────────────────
+async function handleImport(files) {
+  if (!files || files.length === 0) return;
+  setStatus('Verarbeite JSON-Dateien…');
+  const trackCounts  = {};
+  const artistCounts = {};
+  let totalPlays = 0, totalMs = 0;
 
-    if (!resp.ok) throw new Error('API Fehler ' + resp.status + ': ' + endpoint);
-    return resp.json();
-  }
-
-  async function loadAll() {
-    clearError();
-    setStatus('Lade Daten…');
+  for (const file of files) {
     try {
-      const [me, tracks, artists] = await Promise.all([
-        apiFetch('/me'),
-        apiFetch(`/me/top/tracks?limit=50&time_range=${currentRange}`),
-        apiFetch(`/me/top/artists?limit=50&time_range=${currentRange}`),
-      ]);
-
-      document.getElementById('user-info').textContent = me.display_name || me.id;
-      renderTracks(tracks.items);
-      renderArtists(artists.items);
-      setStatus('');
-    } catch (e) {
-      setStatus('');
-      showError(e.message);
-    }
+      const text = await file.text();
+      const entries = JSON.parse(text);
+      for (const e of entries) {
+        const ms       = e.ms_played || 0;
+        const track    = e.master_metadata_track_name;
+        const artist   = e.master_metadata_album_artist_name;
+        if (!track || !artist || ms < 30000) continue; // skip <30s plays
+        totalPlays++;
+        totalMs += ms;
+        const tkey = `${track}|||${artist}`;
+        trackCounts[tkey]  = (trackCounts[tkey]  || 0) + 1;
+        artistCounts[artist] = (artistCounts[artist] || 0) + 1;
+      }
+    } catch(e) { showError('Fehler beim Lesen: ' + file.name); }
   }
 
-  // ── RENDER ───────────────────────────────────────────────────────────────────
-  function renderTracks(items) {
-    const list = document.getElementById('tracks-list');
-    if (!items || items.length === 0) {
-      list.innerHTML = '<li style="color:var(--dim);padding:12px 0;font-size:11px">Keine Daten verfügbar.</li>';
-      return;
-    }
-    list.innerHTML = items.map((t, i) => `
-      <li class="track-item">
-        <span class="rank">${String(i + 1).padStart(2, '0')}</span>
-        <span class="track-name" title="${esc(t.name)}">${esc(t.name)}</span>
-        <span class="track-artist" title="${esc(t.artists.map(a => a.name).join(', '))}">
-          ${esc(t.artists.map(a => a.name).join(', '))}
-        </span>
-      </li>
-    `).join('');
-  }
+  const topTracks  = Object.entries(trackCounts).sort((a,b) => b[1]-a[1]).slice(0, 100);
+  const topArtists = Object.entries(artistCounts).sort((a,b) => b[1]-a[1]).slice(0, 100);
 
-  function renderArtists(items) {
-    const list = document.getElementById('artists-list');
-    if (!items || items.length === 0) {
-      list.innerHTML = '<li style="color:var(--dim);padding:12px 0;font-size:11px">Keine Daten verfügbar.</li>';
-      return;
-    }
-    list.innerHTML = items.map((a, i) => `
-      <li class="artist-item">
-        <span class="rank">${String(i + 1).padStart(2, '0')}</span>
-        <span class="artist-name">${esc(a.name)}</span>
-        <span class="artist-genres" title="${esc((a.genres || []).join(', '))}">
-          ${esc((a.genres || []).slice(0, 3).join(', '))}
-        </span>
-      </li>
-    `).join('');
-  }
+  const hours = Math.round(totalMs / 3600000);
+  const statsEl = document.getElementById('import-stats');
+  statsEl.style.display = 'block';
+  statsEl.innerHTML =
+    `Streams gesamt: <span>${totalPlays.toLocaleString('de')}</span><br>` +
+    `Stunden gehört: <span>${hours.toLocaleString('de')} h</span><br>` +
+    `Einzigartige Tracks: <span>${Object.keys(trackCounts).length.toLocaleString('de')}</span><br>` +
+    `Einzigartige Artists: <span>${Object.keys(artistCounts).length.toLocaleString('de')}</span>`;
 
-  function esc(str) {
-    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+  renderImportTracks(topTracks);
+  renderImportArtists(topArtists);
+  setStatus('');
+}
 
-  // ── TIME RANGE ───────────────────────────────────────────────────────────────
-  function setRange(range, btn) {
-    currentRange = range;
-    document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    loadAll();
-  }
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderTracks(items) {
+  const list = document.getElementById('tracks-list');
+  if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
+  list.innerHTML = items.map((t, i) => `
+    <li class="track-item">
+      <span class="rank">${pad(i+1)}</span>
+      <span class="track-name" title="${esc(t.name)}">${esc(t.name)}</span>
+      <span class="track-artist" title="${esc(t.artists.map(a=>a.name).join(', '))}">${esc(t.artists.map(a=>a.name).join(', '))}</span>
+      <span class="play-count none">—</span>
+    </li>`).join('');
+}
 
-  // ── UI STATE ─────────────────────────────────────────────────────────────────
-  function showApp() {
-    document.getElementById('login-screen').style.display  = 'none';
-    document.getElementById('main-content').style.display  = 'block';
-    document.getElementById('refresh-btn').style.display   = 'inline-block';
-    document.getElementById('logout-btn').style.display    = 'inline-block';
-  }
+function renderArtists(items) {
+  const list = document.getElementById('artists-list');
+  if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
+  list.innerHTML = items.map((a, i) => `
+    <li class="artist-item">
+      <span class="rank">${pad(i+1)}</span>
+      <span class="artist-name">${esc(a.name)}</span>
+      <span class="artist-meta">${esc((a.genres||[]).slice(0,3).join(', '))}</span>
+      <span class="play-count none">—</span>
+    </li>`).join('');
+}
 
-  function showLogin() {
-    document.getElementById('login-screen').style.display  = '';
-    document.getElementById('main-content').style.display  = 'none';
-    document.getElementById('refresh-btn').style.display   = 'none';
-    document.getElementById('logout-btn').style.display    = 'none';
-    document.getElementById('user-info').textContent       = '';
-  }
+function renderLfmTracks(items) {
+  const list = document.getElementById('lfm-tracks-list');
+  if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
+  list.innerHTML = items.map((t, i) => `
+    <li class="track-item">
+      <span class="rank">${pad(i+1)}</span>
+      <span class="track-name" title="${esc(t.name)}">${esc(t.name)}</span>
+      <span class="track-artist">${esc(t.artist.name)}</span>
+      <span class="play-count lastfm">${Number(t.playcount).toLocaleString('de')} ×</span>
+    </li>`).join('');
+}
 
-  function setStatus(msg) {
-    const el = document.getElementById('status');
-    el.innerHTML = msg
-      ? `<span class="loading-text">${esc(msg)}</span>`
-      : '';
-  }
+function renderLfmArtists(items) {
+  const list = document.getElementById('lfm-artists-list');
+  if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
+  list.innerHTML = items.map((a, i) => `
+    <li class="artist-item">
+      <span class="rank">${pad(i+1)}</span>
+      <span class="artist-name">${esc(a.name)}</span>
+      <span class="artist-meta"></span>
+      <span class="play-count lastfm">${Number(a.playcount).toLocaleString('de')} ×</span>
+    </li>`).join('');
+}
 
-  function showError(msg) {
-    document.getElementById('error-container').innerHTML =
-      `<div class="error-msg">ERR: ${esc(msg)}</div>`;
-  }
+function renderImportTracks(items) {
+  const list = document.getElementById('import-tracks-list');
+  if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
+  list.innerHTML = items.map(([key, count], i) => {
+    const [name, artist] = key.split('|||');
+    return `<li class="track-item">
+      <span class="rank">${pad(i+1)}</span>
+      <span class="track-name" title="${esc(name)}">${esc(name)}</span>
+      <span class="track-artist">${esc(artist)}</span>
+      <span class="play-count" style="color:#e5a000">${count.toLocaleString('de')} ×</span>
+    </li>`;
+  }).join('');
+}
 
-  function clearError() {
-    document.getElementById('error-container').innerHTML = '';
-  }
+function renderImportArtists(items) {
+  const list = document.getElementById('import-artists-list');
+  if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
+  list.innerHTML = items.map(([name, count], i) => `
+    <li class="artist-item">
+      <span class="rank">${pad(i+1)}</span>
+      <span class="artist-name">${esc(name)}</span>
+      <span class="artist-meta"></span>
+      <span class="play-count" style="color:#e5a000">${count.toLocaleString('de')} ×</span>
+    </li>`).join('');
+}
 
-  // ── INIT ─────────────────────────────────────────────────────────────────────
-  (async function init() {
-    const params = new URLSearchParams(window.location.search);
+// ── UI STATE ──────────────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('spotify-section').style.display = tab === 'spotify' ? '' : 'none';
+  document.getElementById('lastfm-section').style.display  = tab === 'lastfm'  ? '' : 'none';
+  document.getElementById('import-section').style.display  = tab === 'import'  ? '' : 'none';
+}
 
-    if (params.get('code') || params.get('error')) {
-      await handleCallback();
-      return;
-    }
+function setRange(range, btn) {
+  currentRange = range;
+  document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadAll();
+}
 
-    const token = localStorage.getItem('sp_access_token');
-    const expAt  = Number(localStorage.getItem('sp_expires_at') || 0);
+function onRefresh() {
+  if (currentTab === 'spotify') loadAll();
+  else if (currentTab === 'lastfm') loadLastfm();
+}
 
-    if (token && Date.now() < expAt) {
-      showApp();
-      await loadAll();
-    } else if (token && localStorage.getItem('sp_refresh_token')) {
-      const ok = await refreshToken();
-      if (ok) { showApp(); await loadAll(); }
-      else showLogin();
-    } else {
-      showLogin();
-    }
-  })();
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+  document.getElementById('refresh-btn').style.display  = 'inline-block';
+  document.getElementById('logout-btn').style.display   = 'inline-block';
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = '';
+  document.getElementById('main-content').style.display = 'none';
+  document.getElementById('refresh-btn').style.display  = 'none';
+  document.getElementById('logout-btn').style.display   = 'none';
+  document.getElementById('user-info').textContent      = '';
+}
+
+function setStatus(msg) {
+  document.getElementById('status').innerHTML = msg
+    ? `<span class="loading-text">${esc(msg)}</span>` : '';
+}
+
+function showError(msg) {
+  document.getElementById('error-container').innerHTML =
+    `<div class="error-msg">ERR: ${esc(msg)}</div>`;
+}
+
+function clearError() {
+  document.getElementById('error-container').innerHTML = '';
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+function emptyRow() { return '<li style="color:var(--dim);padding:12px 0;font-size:11px">Keine Daten.</li>'; }
 </script>
 </body>
 </html>
