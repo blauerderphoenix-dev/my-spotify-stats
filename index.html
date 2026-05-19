@@ -285,6 +285,7 @@
 
   /* LAST.FM TAB */
   #lastfm-section { display: none; }
+  #lastfm-section.active { display: block; }
 
   .lfm-input-row {
     display: flex;
@@ -298,6 +299,7 @@
 
   /* IMPORT TAB */
   #import-section { display: none; }
+  #import-section.active { display: block; }
 
   .import-zone {
     border: 1px dashed var(--dim);
@@ -785,9 +787,14 @@ function switchTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('spotify-section').style.display = tab === 'spotify' ? '' : 'none';
-  document.getElementById('lastfm-section').style.display  = tab === 'lastfm'  ? '' : 'none';
-  document.getElementById('import-section').style.display  = tab === 'import'  ? '' : 'none';
+  document.getElementById('spotify-section').style.display = tab === 'spotify' ? 'block' : 'none';
+  document.getElementById('lastfm-section').style.display  = tab === 'lastfm'  ? 'block' : 'none';
+  document.getElementById('import-section').style.display  = tab === 'import'  ? 'block' : 'none';
+  // Auto-load Last.fm if username already saved
+  if (tab === 'lastfm' && document.getElementById('lfm-username').value.trim() &&
+      !document.getElementById('lfm-tracks-list').innerHTML) {
+    loadLastfm();
+  }
 }
 
 function setRange(range, btn) {
