@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPOTIFY STATS</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --line: #222222;
+    --dim: #444444;
+    --mid: #888888;
+    --text: #e8e8e8;
+    --accent: #1DB954;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  #app {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .site-title {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--mid);
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  #user-info {
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+  }
+
+  /* BUTTONS */
+  button {
+    background: none;
+    border: 1px solid var(--dim);
+    color: var(--mid);
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  button:hover {
+    border-color: var(--text);
+    color: var(--text);
+  }
+
+  #login-btn {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-size: 12px;
+    padding: 10px 22px;
+    letter-spacing: 0.2em;
+  }
+
+  #login-btn:hover {
+    background: var(--accent);
+    color: #000;
+  }
+
+  /* LOGIN SCREEN */
+  #login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 60px;
+    gap: 24px;
+  }
+
+  .login-label {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  #client-id-input {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 8px 12px;
+    width: 340px;
+    max-width: 100%;
+    outline: none;
+    letter-spacing: 0.05em;
+  }
+
+  #client-id-input:focus {
+    border-color: var(--dim);
+  }
+
+  #client-id-input::placeholder {
+    color: var(--dim);
+  }
+
+  .redirect-note {
+    font-size: 11px;
+    color: var(--dim);
+    max-width: 400px;
+    line-height: 1.8;
+  }
+
+  .redirect-note code {
+    color: var(--mid);
+    background: var(--bg2);
+    padding: 1px 5px;
+  }
+
+  /* MAIN CONTENT */
+  #main-content { display: none; }
+
+  /* TIME FILTER */
+  .filter-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+    border: 1px solid var(--line);
+    width: fit-content;
+  }
+
+  .filter-bar button {
+    border: none;
+    border-right: 1px solid var(--line);
+    padding: 7px 16px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    border-radius: 0;
+  }
+
+  .filter-bar button:last-child {
+    border-right: none;
+  }
+
+  .filter-bar button.active {
+    background: var(--text);
+    color: #000;
+    border-color: var(--text);
+  }
+
+  .filter-bar button.active:hover {
+    background: var(--text);
+    color: #000;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin-bottom: 52px;
+  }
+
+  .section-header {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* LIST */
+  .track-list, .artist-list {
+    list-style: none;
+  }
+
+  .track-item, .artist-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 0;
+  }
+
+  .track-item:last-child, .artist-item:last-child {
+    border-bottom: none;
+  }
+
+  .rank {
+    width: 36px;
+    color: var(--dim);
+    font-size: 11px;
+    flex-shrink: 0;
+    text-align: right;
+    padding-right: 16px;
+  }
+
+  .track-name {
+    flex: 1;
+    color: var(--text);
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 16px;
+  }
+
+  .track-artist {
+    color: var(--mid);
+    font-size: 11px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  .artist-name {
+    flex: 1;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .artist-genres {
+    color: var(--dim);
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    max-width: 260px;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* STATUS */
+  #status {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+    min-height: 18px;
+  }
+
+  .loading-text {
+    color: var(--dim);
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  /* ERROR */
+  .error-msg {
+    color: #e05555;
+    font-size: 11px;
+    border: 1px solid #3a1515;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    background: #160808;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--line); }
+
+  @media (max-width: 560px) {
+    .track-artist { max-width: 120px; }
+    .artist-genres { max-width: 140px; }
+    #client-id-input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <span class="site-title">Spotify Stats</span>
+    <div class="header-right">
+      <span id="user-info"></span>
+      <button id="refresh-btn" style="display:none" onclick="loadAll()">Refresh</button>
+      <button id="logout-btn" style="display:none" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div>
+      <div class="login-label" style="margin-bottom:10px">Client ID</div>
+      <input
+        id="client-id-input"
+        type="text"
+        placeholder="Deine Spotify App Client ID"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+    <button id="login-btn" onclick="startLogin()">Login with Spotify</button>
+    <div class="redirect-note">
+      Redirect URI in deiner Spotify App eintragen:<br>
+      <code id="redirect-uri-display"></code><br><br>
+      Benötigte Scopes: <code>user-top-read</code>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main-content">
+    <div id="error-container"></div>
+    <div id="status"></div>
+
+    <div class="filter-bar">
+      <button class="active" onclick="setRange('short_term', this)">4 Wochen</button>
+      <button onclick="setRange('medium_term', this)">6 Monate</button>
+      <button onclick="setRange('long_term', this)">All Time</button>
+    </div>
+
+    <div class="section">
+      <div class="section-header">Top Tracks</div>
+      <ul class="track-list" id="tracks-list"></ul>
+    </div>
+
+    <div class="section">
+      <div class="section-header">Top Artists</div>
+      <ul class="artist-list" id="artists-list"></ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────────────────────────
+  const REDIRECT_URI = window.location.origin + window.location.pathname;
+  const SCOPES       = 'user-top-read user-read-private';
+  const API          = 'https://api.spotify.com/v1';
+
+  let currentRange = 'short_term';
+
+  // ── DOM READY ───────────────────────────────────────────────────────────────
+  document.getElementById('redirect-uri-display').textContent = REDIRECT_URI;
+
+  const savedClientId = localStorage.getItem('sp_client_id');
+  if (savedClientId) document.getElementById('client-id-input').value = savedClientId;
+
+  // ── PKCE HELPERS ─────────────────────────────────────────────────────────────
+  function randomBytes(n) {
+    const arr = new Uint8Array(n);
+    crypto.getRandomValues(arr);
+    return arr;
+  }
+
+  function base64urlEncode(buf) {
+    return btoa(String.fromCharCode(...buf))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  async function sha256(plain) {
+    const enc = new TextEncoder().encode(plain);
+    const hash = await crypto.subtle.digest('SHA-256', enc);
+    return new Uint8Array(hash);
+  }
+
+  async function pkceChallenge() {
+    const verifier  = base64urlEncode(randomBytes(32));
+    const challenge = base64urlEncode(await sha256(verifier));
+    return { verifier, challenge };
+  }
+
+  // ── AUTH FLOW ────────────────────────────────────────────────────────────────
+  async function startLogin() {
+    const clientId = document.getElementById('client-id-input').value.trim();
+    if (!clientId) { showError('Bitte Client ID eingeben.'); return; }
+    localStorage.setItem('sp_client_id', clientId);
+
+    const { verifier, challenge } = await pkceChallenge();
+    localStorage.setItem('sp_verifier', verifier);
+
+    const state = base64urlEncode(randomBytes(8));
+    localStorage.setItem('sp_state', state);
+
+    const url = new URL('https://accounts.spotify.com/authorize');
+    url.searchParams.set('client_id',             clientId);
+    url.searchParams.set('response_type',         'code');
+    url.searchParams.set('redirect_uri',          REDIRECT_URI);
+    url.searchParams.set('state',                 state);
+    url.searchParams.set('scope',                 SCOPES);
+    url.searchParams.set('code_challenge_method', 'S256');
+    url.searchParams.set('code_challenge',        challenge);
+
+    window.location.href = url.toString();
+  }
+
+  async function handleCallback() {
+    const params   = new URLSearchParams(window.location.search);
+    const code     = params.get('code');
+    const state    = params.get('state');
+    const error    = params.get('error');
+
+    // Clean URL
+    history.replaceState({}, '', window.location.pathname);
+
+    if (error) { showError('Spotify Fehler: ' + error); return; }
+    if (!code)  return;
+
+    const savedState = localStorage.getItem('sp_state');
+    if (state !== savedState) { showError('State mismatch – möglicher CSRF.'); return; }
+
+    const clientId = localStorage.getItem('sp_client_id');
+    const verifier = localStorage.getItem('sp_verifier');
+
+    setStatus('Lade Access Token…');
+    try {
+      const resp = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id:     clientId,
+          grant_type:    'authorization_code',
+          code,
+          redirect_uri:  REDIRECT_URI,
+          code_verifier: verifier,
+        }),
+      });
+      if (!resp.ok) throw new Error('Token-Anfrage fehlgeschlagen: ' + resp.status);
+      const data = await resp.json();
+
+      localStorage.setItem('sp_access_token',  data.access_token);
+      localStorage.setItem('sp_refresh_token', data.refresh_token || '');
+      localStorage.setItem('sp_expires_at',    Date.now() + (data.expires_in - 60) * 1000);
+
+      localStorage.removeItem('sp_verifier');
+      localStorage.removeItem('sp_state');
+
+      showApp();
+      await loadAll();
+    } catch (e) {
+      showError(e.message);
+    }
+  }
+
+  async function refreshToken() {
+    const clientId = localStorage.getItem('sp_client_id');
+    const rt       = localStorage.getItem('sp_refresh_token');
+    if (!rt) { logout(); return false; }
+
+    const resp = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id:     clientId,
+        grant_type:    'refresh_token',
+        refresh_token: rt,
+      }),
+    });
+
+    if (!resp.ok) { logout(); return false; }
+    const data = await resp.json();
+
+    localStorage.setItem('sp_access_token', data.access_token);
+    localStorage.setItem('sp_expires_at',   Date.now() + (data.expires_in - 60) * 1000);
+    if (data.refresh_token) localStorage.setItem('sp_refresh_token', data.refresh_token);
+    return true;
+  }
+
+  async function getToken() {
+    const expiresAt = Number(localStorage.getItem('sp_expires_at') || 0);
+    if (Date.now() > expiresAt) {
+      const ok = await refreshToken();
+      if (!ok) return null;
+    }
+    return localStorage.getItem('sp_access_token');
+  }
+
+  function logout() {
+    ['sp_access_token','sp_refresh_token','sp_expires_at','sp_verifier','sp_state']
+      .forEach(k => localStorage.removeItem(k));
+    showLogin();
+  }
+
+  // ── API CALLS ────────────────────────────────────────────────────────────────
+  async function apiFetch(endpoint) {
+    const token = await getToken();
+    if (!token) throw new Error('Kein gültiger Token.');
+
+    const resp = await fetch(API + endpoint, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    if (resp.status === 401) {
+      const ok = await refreshToken();
+      if (!ok) throw new Error('Token abgelaufen. Bitte erneut einloggen.');
+      return apiFetch(endpoint);
+    }
+
+    if (!resp.ok) throw new Error('API Fehler ' + resp.status + ': ' + endpoint);
+    return resp.json();
+  }
+
+  async function loadAll() {
+    clearError();
+    setStatus('Lade Daten…');
+    try {
+      const [me, tracks, artists] = await Promise.all([
+        apiFetch('/me'),
+        apiFetch(`/me/top/tracks?limit=50&time_range=${currentRange}`),
+        apiFetch(`/me/top/artists?limit=50&time_range=${currentRange}`),
+      ]);
+
+      document.getElementById('user-info').textContent = me.display_name || me.id;
+      renderTracks(tracks.items);
+      renderArtists(artists.items);
+      setStatus('');
+    } catch (e) {
+      setStatus('');
+      showError(e.message);
+    }
+  }
+
+  // ── RENDER ───────────────────────────────────────────────────────────────────
+  function renderTracks(items) {
+    const list = document.getElementById('tracks-list');
+    if (!items || items.length === 0) {
+      list.innerHTML = '<li style="color:var(--dim);padding:12px 0;font-size:11px">Keine Daten verfügbar.</li>';
+      return;
+    }
+    list.innerHTML = items.map((t, i) => `
+      <li class="track-item">
+        <span class="rank">${String(i + 1).padStart(2, '0')}</span>
+        <span class="track-name" title="${esc(t.name)}">${esc(t.name)}</span>
+        <span class="track-artist" title="${esc(t.artists.map(a => a.name).join(', '))}">
+          ${esc(t.artists.map(a => a.name).join(', '))}
+        </span>
+      </li>
+    `).join('');
+  }
+
+  function renderArtists(items) {
+    const list = document.getElementById('artists-list');
+    if (!items || items.length === 0) {
+      list.innerHTML = '<li style="color:var(--dim);padding:12px 0;font-size:11px">Keine Daten verfügbar.</li>';
+      return;
+    }
+    list.innerHTML = items.map((a, i) => `
+      <li class="artist-item">
+        <span class="rank">${String(i + 1).padStart(2, '0')}</span>
+        <span class="artist-name">${esc(a.name)}</span>
+        <span class="artist-genres" title="${esc((a.genres || []).join(', '))}">
+          ${esc((a.genres || []).slice(0, 3).join(', '))}
+        </span>
+      </li>
+    `).join('');
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── TIME RANGE ───────────────────────────────────────────────────────────────
+  function setRange(range, btn) {
+    currentRange = range;
+    document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadAll();
+  }
+
+  // ── UI STATE ─────────────────────────────────────────────────────────────────
+  function showApp() {
+    document.getElementById('login-screen').style.display  = 'none';
+    document.getElementById('main-content').style.display  = 'block';
+    document.getElementById('refresh-btn').style.display   = 'inline-block';
+    document.getElementById('logout-btn').style.display    = 'inline-block';
+  }
+
+  function showLogin() {
+    document.getElementById('login-screen').style.display  = '';
+    document.getElementById('main-content').style.display  = 'none';
+    document.getElementById('refresh-btn').style.display   = 'none';
+    document.getElementById('logout-btn').style.display    = 'none';
+    document.getElementById('user-info').textContent       = '';
+  }
+
+  function setStatus(msg) {
+    const el = document.getElementById('status');
+    el.innerHTML = msg
+      ? `<span class="loading-text">${esc(msg)}</span>`
+      : '';
+  }
+
+  function showError(msg) {
+    document.getElementById('error-container').innerHTML =
+      `<div class="error-msg">ERR: ${esc(msg)}</div>`;
+  }
+
+  function clearError() {
+    document.getElementById('error-container').innerHTML = '';
+  }
+
+  // ── INIT ─────────────────────────────────────────────────────────────────────
+  (async function init() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('code') || params.get('error')) {
+      await handleCallback();
+      return;
+    }
+
+    const token = localStorage.getItem('sp_access_token');
+    const expAt  = Number(localStorage.getItem('sp_expires_at') || 0);
+
+    if (token && Date.now() < expAt) {
+      showApp();
+      await loadAll();
+    } else if (token && localStorage.getItem('sp_refresh_token')) {
+      const ok = await refreshToken();
+      if (ok) { showApp(); await loadAll(); }
+      else showLogin();
+    } else {
+      showLogin();
+    }
+  })();
+</script>
+</body>
+</html>
