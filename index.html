@@ -8,12 +8,14 @@
   :root {
     --bg: #0a0a0a;
     --bg2: #111111;
-    --line: #222222;
-    --dim: #444444;
-    --mid: #888888;
+    --bg3: #161616;
+    --line: #1e1e1e;
+    --dim: #3a3a3a;
+    --mid: #777777;
     --text: #e8e8e8;
     --accent: #1DB954;
     --accent2: #d51007;
+    --accent3: #e5a000;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,43 +29,27 @@
     min-height: 100vh;
   }
 
-  #app {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-  }
+  #app { max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px; }
 
+  /* HEADER */
   header {
     border-bottom: 1px solid var(--line);
     padding-bottom: 20px;
     margin-bottom: 32px;
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
   }
 
-  .site-title {
-    font-size: 11px;
-    letter-spacing: 0.25em;
-    color: var(--mid);
-    text-transform: uppercase;
-  }
+  .site-title { font-size: 11px; letter-spacing: 0.25em; color: var(--mid); text-transform: uppercase; }
 
-  .header-right {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
+  .header-right { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
-  #user-info {
-    font-size: 11px;
-    color: var(--mid);
-    letter-spacing: 0.05em;
-  }
+  #user-info { font-size: 11px; color: var(--mid); }
 
+  /* BUTTONS */
   button {
     background: none;
     border: 1px solid var(--dim);
@@ -76,382 +62,146 @@
     cursor: pointer;
     transition: border-color 0.15s, color 0.15s, background 0.15s;
   }
+  button:hover { border-color: var(--text); color: var(--text); }
 
-  button:hover {
-    border-color: var(--text);
-    color: var(--text);
-  }
-
-  #login-btn {
-    border-color: var(--accent);
-    color: var(--accent);
-    font-size: 12px;
-    padding: 10px 22px;
-    letter-spacing: 0.2em;
-  }
-
-  #login-btn:hover {
-    background: var(--accent);
-    color: #000;
-  }
+  #login-btn { border-color: var(--accent); color: var(--accent); font-size: 12px; padding: 10px 22px; letter-spacing: 0.2em; }
+  #login-btn:hover { background: var(--accent); color: #000; }
 
   /* LOGIN */
-  #login-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding-top: 60px;
-    gap: 24px;
-  }
-
-  .login-label {
-    font-size: 11px;
-    color: var(--dim);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
+  #login-screen { display: flex; flex-direction: column; align-items: flex-start; padding-top: 60px; gap: 24px; }
+  .login-label { font-size: 11px; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
 
   input[type="text"] {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 12px;
-    padding: 8px 12px;
-    width: 340px;
-    max-width: 100%;
-    outline: none;
-    letter-spacing: 0.05em;
+    background: var(--bg2); border: 1px solid var(--line); color: var(--text);
+    font-family: inherit; font-size: 12px; padding: 8px 12px;
+    width: 340px; max-width: 100%; outline: none;
   }
-
   input[type="text"]:focus { border-color: var(--dim); }
   input[type="text"]::placeholder { color: var(--dim); }
 
-  .redirect-note {
-    font-size: 11px;
-    color: var(--dim);
-    max-width: 440px;
-    line-height: 1.8;
-  }
-
-  .redirect-note code {
-    color: var(--mid);
-    background: var(--bg2);
-    padding: 1px 5px;
-  }
+  .redirect-note { font-size: 11px; color: var(--dim); max-width: 440px; line-height: 1.8; }
+  .redirect-note code { color: var(--mid); background: var(--bg2); padding: 1px 5px; }
 
   /* MAIN */
   #main-content { display: none; }
 
-  /* TABS */
-  .tab-bar {
-    display: flex;
-    gap: 0;
-    margin-bottom: 28px;
-    border-bottom: 1px solid var(--line);
-  }
-
+  /* TOP TABS */
+  .tab-bar { display: flex; gap: 0; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
   .tab-bar button {
-    border: none;
-    border-bottom: 2px solid transparent;
-    padding: 8px 20px;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    border-radius: 0;
-    margin-bottom: -1px;
+    border: none; border-bottom: 2px solid transparent;
+    padding: 8px 20px; font-size: 11px; letter-spacing: 0.2em;
+    border-radius: 0; margin-bottom: -1px;
   }
+  .tab-bar button.active { color: var(--text); border-bottom-color: var(--accent); }
 
-  .tab-bar button.active {
-    color: var(--text);
-    border-bottom-color: var(--accent);
-  }
-
-  /* FILTER */
-  .filter-bar {
-    display: flex;
-    gap: 0;
-    margin-bottom: 28px;
-    border: 1px solid var(--line);
-    width: fit-content;
-  }
-
-  .filter-bar button {
-    border: none;
-    border-right: 1px solid var(--line);
-    padding: 7px 16px;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    border-radius: 0;
-  }
-
+  /* TIME FILTER */
+  .filter-bar { display: flex; gap: 0; margin-bottom: 24px; border: 1px solid var(--line); width: fit-content; }
+  .filter-bar button { border: none; border-right: 1px solid var(--line); padding: 7px 16px; font-size: 10px; letter-spacing: 0.15em; border-radius: 0; }
   .filter-bar button:last-child { border-right: none; }
+  .filter-bar button.active { background: var(--text); color: #000; }
+  .filter-bar button.active:hover { background: var(--text); color: #000; }
 
-  .filter-bar button.active {
-    background: var(--text);
-    color: #000;
+  /* SECTION TABS (Songs / Künstler / Genres) */
+  .section-tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid var(--line); }
+  .section-tab {
+    border: none; border-bottom: 2px solid transparent;
+    padding: 7px 20px; font-size: 11px; letter-spacing: 0.15em;
+    border-radius: 0; margin-bottom: -1px; color: var(--mid);
   }
+  .section-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .section-tab:hover { color: var(--text); }
 
-  .filter-bar button.active:hover {
-    background: var(--text);
-    color: #000;
-  }
-
-  /* SECTIONS */
-  .section { margin-bottom: 52px; }
-
+  /* SECTION */
+  .section { margin-bottom: 40px; }
   .section-header {
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    color: var(--dim);
-    text-transform: uppercase;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 2px;
+    font-size: 10px; letter-spacing: 0.3em; color: var(--dim);
+    text-transform: uppercase; padding-bottom: 10px;
+    border-bottom: 1px solid var(--line); margin-bottom: 2px;
+    display: flex; justify-content: space-between; align-items: center;
   }
 
-  /* LISTS */
+  .section-header .mb-note { font-size: 9px; color: var(--dim); letter-spacing: 0.1em; }
+
+  /* TRACK LIST */
   .track-list, .artist-list { list-style: none; }
 
   .track-item, .artist-item {
-    display: flex;
-    align-items: baseline;
+    display: grid;
     border-bottom: 1px solid var(--line);
     padding: 10px 0;
     gap: 0;
+    align-items: start;
   }
+
+  .track-item { grid-template-columns: 36px 1fr; }
+  .artist-item { grid-template-columns: 36px 1fr; }
 
   .track-item:last-child, .artist-item:last-child { border-bottom: none; }
 
-  .rank {
-    width: 36px;
-    color: var(--dim);
-    font-size: 11px;
-    flex-shrink: 0;
-    text-align: right;
-    padding-right: 16px;
+  .rank { color: var(--dim); font-size: 11px; text-align: right; padding-right: 16px; padding-top: 1px; }
+
+  .track-main { display: flex; flex-direction: column; gap: 3px; }
+
+  .track-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .track-name { color: var(--text); font-size: 13px; }
+  .track-artist { color: var(--mid); font-size: 11px; }
+
+  .track-meta-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 2px; }
+  .meta-tag {
+    font-size: 10px; color: var(--dim); letter-spacing: 0.05em;
   }
+  .meta-tag span { color: var(--mid); }
+  .meta-tag.loading { color: var(--dim); animation: blink 1.2s step-end infinite; }
 
-  .track-name {
-    flex: 1;
-    color: var(--text);
-    font-size: 13px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-right: 16px;
+  /* ARTIST ITEM */
+  .artist-main { display: flex; flex-direction: column; gap: 3px; }
+  .artist-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .artist-name { color: var(--text); font-size: 13px; }
+  .artist-sp-genres { color: var(--mid); font-size: 11px; }
+  .artist-meta-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 2px; }
+
+  /* GENRE LIST */
+  .genre-list { list-style: none; }
+  .genre-item {
+    display: flex; align-items: center;
+    border-bottom: 1px solid var(--line); padding: 9px 0; gap: 0;
   }
+  .genre-item:last-child { border-bottom: none; }
+  .genre-name { flex: 0 0 220px; color: var(--text); font-size: 12px; padding-right: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .genre-source { font-size: 9px; color: var(--dim); padding-right: 12px; flex-shrink: 0; }
+  .genre-bar-wrap { flex: 1; background: var(--line); height: 2px; margin-right: 16px; }
+  .genre-bar { display: block; height: 100%; background: var(--accent); min-width: 2px; }
+  .genre-score { color: var(--dim); font-size: 10px; width: 36px; text-align: right; flex-shrink: 0; }
 
-  .track-artist {
-    color: var(--mid);
-    font-size: 11px;
-    flex-shrink: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 180px;
-    padding-right: 16px;
-  }
-
-  .play-count {
-    color: var(--accent);
-    font-size: 11px;
-    flex-shrink: 0;
-    text-align: right;
-    min-width: 60px;
-    letter-spacing: 0.05em;
-  }
-
-  .play-count.lastfm { color: var(--accent2); }
-  .play-count.none   { color: var(--dim); }
-
-  .artist-name {
-    flex: 1;
-    color: var(--text);
-    font-size: 13px;
-  }
-
-  .artist-meta {
-    color: var(--dim);
-    font-size: 10px;
-    flex-shrink: 0;
-    max-width: 240px;
-    text-align: right;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding-right: 16px;
-  }
-
-  /* LAST.FM TAB */
-  #lastfm-section { display: none; }
-  #lastfm-section.active { display: block; }
-
-  .lfm-input-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-  }
-
+  /* LAST.FM */
+  .lfm-input-row { display: flex; gap: 10px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
   .lfm-input-row input { width: 220px; }
 
-  /* IMPORT TAB */
-  #import-section { display: none; }
-  #import-section.active { display: block; }
-
-  .import-zone {
-    border: 1px dashed var(--dim);
-    padding: 32px 24px;
-    margin-bottom: 24px;
-    max-width: 480px;
-  }
-
-  .import-zone p {
-    color: var(--mid);
-    font-size: 11px;
-    line-height: 1.9;
-  }
-
-  .import-zone code {
-    color: var(--text);
-    background: var(--bg2);
-    padding: 1px 5px;
-  }
-
+  /* IMPORT */
+  .import-zone { border: 1px dashed var(--dim); padding: 28px 24px; margin-bottom: 20px; max-width: 500px; }
+  .import-zone p { color: var(--mid); font-size: 11px; line-height: 1.9; }
+  .import-zone code { color: var(--text); background: var(--bg2); padding: 1px 5px; }
   #file-input { display: none; }
-
-  .import-stats {
-    font-size: 11px;
-    color: var(--mid);
-    margin-bottom: 24px;
-    line-height: 2;
-    border: 1px solid var(--line);
-    padding: 14px 18px;
-    max-width: 480px;
-  }
-
+  .import-stats { font-size: 11px; color: var(--mid); margin-bottom: 24px; line-height: 2; border: 1px solid var(--line); padding: 14px 18px; max-width: 480px; }
   .import-stats span { color: var(--text); }
 
   /* STATUS / ERROR */
-  #status {
-    font-size: 11px;
-    color: var(--dim);
-    letter-spacing: 0.1em;
-    margin-bottom: 20px;
-    min-height: 18px;
-  }
+  #status { font-size: 11px; color: var(--dim); letter-spacing: 0.1em; margin-bottom: 16px; min-height: 16px; }
+  .loading-text { animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
+  .error-msg { color: #e05555; font-size: 11px; border: 1px solid #3a1515; padding: 10px 14px; margin-bottom: 20px; background: #160808; }
 
-  .loading-text {
-    animation: blink 1s step-end infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.2; }
-  }
-
-  .error-msg {
-    color: #e05555;
-    font-size: 11px;
-    border: 1px solid #3a1515;
-    padding: 10px 14px;
-    margin-bottom: 20px;
-    background: #160808;
-  }
-
-  .badge {
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    padding: 2px 6px;
-    border: 1px solid var(--dim);
-    color: var(--dim);
-    vertical-align: middle;
-    margin-left: 8px;
-  }
-
-  .badge.lfm  { border-color: var(--accent2); color: var(--accent2); }
-
-  /* GENRE LIST */
-  .genre-item {
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid var(--line);
-    padding: 9px 0;
-    gap: 0;
-  }
-
-  .genre-item:last-child { border-bottom: none; }
-
-  .genre-name {
-    flex: 0 0 200px;
-    color: var(--text);
-    font-size: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-right: 16px;
-  }
-
-  .genre-bar-wrap {
-    flex: 1;
-    background: var(--line);
-    height: 2px;
-    margin-right: 16px;
-  }
-
-  .genre-bar {
-    display: block;
-    height: 100%;
-    background: var(--accent);
-    min-width: 2px;
-  }
-
-  .genre-score {
-    color: var(--dim);
-    font-size: 10px;
-    width: 36px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  /* SECTION TABS */
-  .section-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 24px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .section-tab {
-    border: none;
-    border-bottom: 2px solid transparent;
-    padding: 8px 22px;
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    border-radius: 0;
-    margin-bottom: -1px;
-    color: var(--dim);
-  }
-
-  .section-tab.active {
-    color: var(--text);
-    border-bottom-color: var(--accent);
-  }
-
-  .section-tab:hover {
-    color: var(--text);
-    border-bottom-color: var(--dim);
-  }
-  .badge.imp  { border-color: #e5a000;        color: #e5a000; }
+  .badge { font-size: 9px; letter-spacing: 0.1em; padding: 2px 5px; border: 1px solid var(--dim); color: var(--dim); vertical-align: middle; margin-left: 6px; }
+  .badge.lfm { border-color: var(--accent2); color: var(--accent2); }
+  .badge.imp { border-color: var(--accent3); color: var(--accent3); }
+  .badge.mb  { border-color: #7c6fff; color: #7c6fff; }
 
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--line); }
 
-  @media (max-width: 560px) {
-    .track-artist { max-width: 100px; }
+  @media (max-width: 600px) {
+    .genre-name { flex: 0 0 140px; }
     input[type="text"] { width: 100%; }
   }
 </style>
@@ -476,9 +226,8 @@
     </div>
     <button id="login-btn" onclick="startLogin()">Login with Spotify</button>
     <div class="redirect-note">
-      Redirect URI in der Spotify App eintragen:<br>
-      <code id="redirect-uri-display"></code><br><br>
-      Benötigte Scopes: <code>user-top-read user-read-private</code>
+      Redirect URI eintragen: <code id="redirect-uri-display"></code><br>
+      Scopes: <code>user-top-read user-read-private user-read-recently-played user-library-read</code>
     </div>
   </div>
 
@@ -487,20 +236,20 @@
     <div id="error-container"></div>
     <div id="status"></div>
 
-    <!-- TABS -->
+    <!-- TOP TABS -->
     <div class="tab-bar">
-      <button class="active" onclick="switchTab('spotify', this)">Spotify Top</button>
-      <button onclick="switchTab('lastfm', this)">Last.fm Counts</button>
-      <button onclick="switchTab('import', this)">Import Export</button>
+      <button class="active" onclick="switchTab('spotify', this)">Spotify</button>
+      <button onclick="switchTab('lastfm', this)">Last.fm</button>
+      <button onclick="switchTab('import', this)">Import</button>
     </div>
 
-    <!-- SPOTIFY TAB -->
-    <div id="spotify-section">
+    <!-- ══ SPOTIFY TAB ══ -->
+    <div id="tab-spotify">
+
       <div class="filter-bar">
-        <button class="active" onclick="setRange('short_term', this)">1 Woche</button>
-        <button onclick="setRange('medium_term', this)">1 Monat</button>
-        <button onclick="setRange('long_term', this)">1 Jahr</button>
-        <button onclick="setRange('long_term', this)">All Time</button>
+        <button class="active" onclick="setRange('short_term', this)">~4 Wochen</button>
+        <button onclick="setRange('medium_term', this)">~6 Monate</button>
+        <button onclick="setRange('long_term', this)">Gesamt</button>
       </div>
 
       <div class="section-tabs">
@@ -509,101 +258,120 @@
         <button class="section-tab" onclick="switchSection('genres', this)">Genres</button>
       </div>
 
-      <div id="section-tracks" class="section">
-        <div class="section-header">Top Songs</div>
+      <!-- SONGS -->
+      <div id="section-tracks">
+        <div class="section-header">
+          Top Songs
+          <span class="mb-note">MB = MusicBrainz Daten</span>
+        </div>
         <ul class="track-list" id="tracks-list"></ul>
       </div>
 
-      <div id="section-artists" class="section" style="display:none">
-        <div class="section-header">Top Künstler</div>
+      <!-- KÜNSTLER -->
+      <div id="section-artists" style="display:none">
+        <div class="section-header">
+          Top Künstler
+          <span class="mb-note">MB = MusicBrainz Daten</span>
+        </div>
         <ul class="artist-list" id="artists-list"></ul>
       </div>
 
-      <div id="section-genres" class="section" style="display:none">
-        <div class="section-header">Top Genres</div>
-        <ul class="track-list" id="genres-list"></ul>
+      <!-- GENRES -->
+      <div id="section-genres" style="display:none">
+        <div class="section-header">Top Genres <span class="badge mb">MB</span> + Spotify</div>
+        <ul class="genre-list" id="genres-list"></ul>
       </div>
+
     </div>
 
-    <!-- LAST.FM TAB -->
-    <div id="lastfm-section">
+    <!-- ══ LAST.FM TAB ══ -->
+    <div id="tab-lastfm" style="display:none">
       <div class="lfm-input-row">
         <input id="lfm-username" type="text" placeholder="Last.fm Username" spellcheck="false"/>
         <button onclick="loadLastfm()">Laden</button>
       </div>
       <div class="section">
-        <div class="section-header">Top Tracks — Last.fm <span class="badge lfm">LAST.FM</span></div>
+        <div class="section-header">Top Tracks <span class="badge lfm">LAST.FM</span></div>
         <ul class="track-list" id="lfm-tracks-list"></ul>
       </div>
       <div class="section">
-        <div class="section-header">Top Artists — Last.fm <span class="badge lfm">LAST.FM</span></div>
+        <div class="section-header">Top Artists <span class="badge lfm">LAST.FM</span></div>
         <ul class="artist-list" id="lfm-artists-list"></ul>
       </div>
     </div>
 
-    <!-- IMPORT TAB -->
-    <div id="import-section">
+    <!-- ══ IMPORT TAB ══ -->
+    <div id="tab-import" style="display:none">
       <div class="import-zone">
         <p>
-          Spotify-Verlaufsdaten importieren:<br><br>
+          Spotify Verlaufsdaten importieren:<br><br>
           1. <code>spotify.com/account</code> → Datenschutz<br>
           2. „Erweiterte Streaming-Daten anfordern"<br>
-          3. Warten (~30 Tage), dann ZIP erhalten<br>
-          4. JSON-Dateien hier hochladen (<code>Streaming_History_Audio_*.json</code>)
+          3. ~30 Tage warten, ZIP erhalten<br>
+          4. <code>Streaming_History_Audio_*.json</code> hier hochladen
         </p>
       </div>
       <button onclick="document.getElementById('file-input').click()">JSON-Dateien auswählen</button>
       <input type="file" id="file-input" accept=".json" multiple onchange="handleImport(this.files)"/>
       <div id="import-stats" class="import-stats" style="display:none"></div>
       <div class="section" style="margin-top:24px">
-        <div class="section-header">Top Tracks — Import <span class="badge imp">IMPORT</span></div>
+        <div class="section-header">Top Tracks <span class="badge imp">IMPORT</span></div>
         <ul class="track-list" id="import-tracks-list"></ul>
       </div>
       <div class="section">
-        <div class="section-header">Top Artists — Import <span class="badge imp">IMPORT</span></div>
+        <div class="section-header">Top Artists <span class="badge imp">IMPORT</span></div>
         <ul class="artist-list" id="import-artists-list"></ul>
       </div>
     </div>
-  </div>
 
-</div>
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
 <script>
-// ── CONSTANTS ────────────────────────────────────────────────────────────────
-const REDIRECT_URI  = window.location.origin + window.location.pathname;
-const SCOPES        = 'user-top-read user-read-private';
-const API           = 'https://api.spotify.com/v1';
-const LFM_KEY       = '0c6c1bcb14dad55db8b608031ac09521';
-const LFM_API       = 'https://ws.audioscrobbler.com/2.0/';
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const REDIRECT_URI = window.location.origin + window.location.pathname;
+const SCOPES       = 'user-top-read user-read-private user-read-recently-played user-library-read';
+const SP_API       = 'https://api.spotify.com/v1';
+const LFM_KEY      = '0c6c1bcb14dad55db8b608031ac09521';
+const LFM_API      = 'https://ws.audioscrobbler.com/2.0/';
+const MB_API       = 'https://musicbrainz.org/ws/2';
+const MB_HEADERS   = { 'User-Agent': 'SpotifyStatsPersonal/1.0' };
 
-let currentRange = 'short_term';
-let currentTab   = 'spotify';
+let currentRange   = 'short_term';
+let currentTab     = 'spotify';
+let currentSection = 'tracks';
+let cachedArtists  = [];   // store for genre building
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
+// MusicBrainz cache to avoid re-fetching
+const mbTrackCache  = {};
+const mbArtistCache = {};
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
 document.getElementById('redirect-uri-display').textContent = REDIRECT_URI;
-const savedClientId = localStorage.getItem('sp_client_id');
-if (savedClientId) document.getElementById('client-id-input').value = savedClientId;
-
-const savedLfmUser = localStorage.getItem('lfm_username');
-if (savedLfmUser) document.getElementById('lfm-username').value = savedLfmUser;
+const _cid = localStorage.getItem('sp_client_id');
+if (_cid) document.getElementById('client-id-input').value = _cid;
+const _lfu = localStorage.getItem('lfm_username');
+if (_lfu) document.getElementById('lfm-username').value = _lfu;
 
 (async function init() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('code') || params.get('error')) { await handleCallback(); return; }
-
-  const token  = localStorage.getItem('sp_access_token');
-  const expAt  = Number(localStorage.getItem('sp_expires_at') || 0);
-
-  if (token && Date.now() < expAt) {
-    showApp(); await loadAll();
-  } else if (token && localStorage.getItem('sp_refresh_token')) {
+  const token = localStorage.getItem('sp_access_token');
+  const expAt = Number(localStorage.getItem('sp_expires_at') || 0);
+  if (token && Date.now() < expAt) { showApp(); await loadAll(); }
+  else if (token && localStorage.getItem('sp_refresh_token')) {
     const ok = await refreshToken();
     if (ok) { showApp(); await loadAll(); } else showLogin();
-  } else {
-    showLogin();
-  }
+  } else { showLogin(); }
 })();
 
-// ── PKCE ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// PKCE / AUTH
+// ═══════════════════════════════════════════════════════════════
 function b64url(buf) {
   return btoa(String.fromCharCode(...buf)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
@@ -613,7 +381,6 @@ async function pkceChallenge() {
   return { verifier: v, challenge: h };
 }
 
-// ── AUTH ─────────────────────────────────────────────────────────────────────
 async function startLogin() {
   const clientId = document.getElementById('client-id-input').value.trim();
   if (!clientId) { showError('Bitte Client ID eingeben.'); return; }
@@ -653,10 +420,8 @@ async function handleCallback() {
       }),
     });
     if (!resp.ok) throw new Error('Token-Anfrage fehlgeschlagen: ' + resp.status);
-    const data = await resp.json();
-    saveToken(data);
-    localStorage.removeItem('sp_verifier');
-    localStorage.removeItem('sp_state');
+    saveToken(await resp.json());
+    localStorage.removeItem('sp_verifier'); localStorage.removeItem('sp_state');
     showApp(); await loadAll();
   } catch(e) { showError(e.message); }
 }
@@ -676,14 +441,12 @@ async function refreshToken() {
     body: new URLSearchParams({ client_id: localStorage.getItem('sp_client_id'), grant_type: 'refresh_token', refresh_token: rt }),
   });
   if (!resp.ok) { logout(); return false; }
-  saveToken(await resp.json());
-  return true;
+  saveToken(await resp.json()); return true;
 }
 
 async function getToken() {
   if (Date.now() > Number(localStorage.getItem('sp_expires_at') || 0)) {
-    const ok = await refreshToken();
-    if (!ok) return null;
+    const ok = await refreshToken(); if (!ok) return null;
   }
   return localStorage.getItem('sp_access_token');
 }
@@ -693,17 +456,15 @@ function logout() {
   showLogin();
 }
 
-// ── SPOTIFY API ───────────────────────────────────────────────────────────────
-async function apiFetch(endpoint) {
+// ═══════════════════════════════════════════════════════════════
+// SPOTIFY API
+// ═══════════════════════════════════════════════════════════════
+async function spFetch(endpoint) {
   const token = await getToken();
-  if (!token) throw new Error('Kein gültiger Token.');
-  const resp = await fetch(API + endpoint, { headers: { Authorization: 'Bearer ' + token } });
-  if (resp.status === 401) {
-    const ok = await refreshToken();
-    if (!ok) throw new Error('Token abgelaufen.');
-    return apiFetch(endpoint);
-  }
-  if (!resp.ok) throw new Error('API Fehler ' + resp.status);
+  if (!token) throw new Error('Kein Token.');
+  const resp = await fetch(SP_API + endpoint, { headers: { Authorization: 'Bearer ' + token } });
+  if (resp.status === 401) { const ok = await refreshToken(); if (!ok) throw new Error('Token abgelaufen.'); return spFetch(endpoint); }
+  if (!resp.ok) throw new Error('Spotify API ' + resp.status);
   return resp.json();
 }
 
@@ -711,19 +472,158 @@ async function loadAll() {
   clearError(); setStatus('Lade Spotify-Daten…');
   try {
     const [me, tracks, artists] = await Promise.all([
-      apiFetch('/me'),
-      apiFetch(`/me/top/tracks?limit=50&time_range=${currentRange}`),
-      apiFetch(`/me/top/artists?limit=50&time_range=${currentRange}`),
+      spFetch('/me'),
+      spFetch(`/me/top/tracks?limit=50&time_range=${currentRange}`),
+      spFetch(`/me/top/artists?limit=50&time_range=${currentRange}`),
     ]);
     document.getElementById('user-info').textContent = me.display_name || me.id;
+    cachedArtists = artists.items;
     renderTracks(tracks.items);
     renderArtists(artists.items);
-    renderGenres(artists.items);
+    renderGenres(artists.items, []);
     setStatus('');
+    // Enrich with MusicBrainz in background
+    enrichTracksMB(tracks.items);
+    enrichArtistsMB(artists.items);
+    buildGenresMB(artists.items);
   } catch(e) { setStatus(''); showError(e.message); }
 }
 
-// ── LAST.FM API ───────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// MUSICBRAINZ API
+// ═══════════════════════════════════════════════════════════════
+async function mbFetch(url) {
+  const resp = await fetch(url, { headers: MB_HEADERS });
+  if (!resp.ok) return null;
+  return resp.json();
+}
+
+async function mbSearchRecording(title, artist) {
+  const key = `${title}||${artist}`;
+  if (mbTrackCache[key]) return mbTrackCache[key];
+  const q = encodeURIComponent(`recording:"${title}" AND artist:"${artist}"`);
+  const data = await mbFetch(`${MB_API}/recording?query=${q}&limit=1&fmt=json`);
+  if (!data || !data.recordings || !data.recordings.length) { mbTrackCache[key] = null; return null; }
+  const rec = data.recordings[0];
+  // Fetch full recording with releases for more data
+  const full = await mbFetch(`${MB_API}/recording/${rec.id}?inc=releases+artist-credits+genres+tags+ratings&fmt=json`);
+  mbTrackCache[key] = full;
+  return full;
+}
+
+async function mbSearchArtist(name) {
+  if (mbArtistCache[name]) return mbArtistCache[name];
+  const q = encodeURIComponent(`artist:"${name}"`);
+  const data = await mbFetch(`${MB_API}/artist?query=${q}&limit=1&fmt=json`);
+  if (!data || !data.artists || !data.artists.length) { mbArtistCache[name] = null; return null; }
+  const art = data.artists[0];
+  const full = await mbFetch(`${MB_API}/artist/${art.id}?inc=genres+tags+ratings+url-rels&fmt=json`);
+  mbArtistCache[name] = full;
+  return full;
+}
+
+// Enrich tracks with MB data (sequential with delay to respect rate limit)
+async function enrichTracksMB(tracks) {
+  for (let i = 0; i < tracks.length; i++) {
+    const t = tracks[i];
+    const el = document.querySelector(`[data-track-id="${t.id}"]`);
+    if (!el) continue;
+    try {
+      await sleep(200);
+      const mb = await mbSearchRecording(t.name, t.artists[0].name);
+      if (!mb) continue;
+      const release = mb.releases && mb.releases[0];
+      const year    = release && (release.date || '').slice(0, 4);
+      const label   = release && release['label-info'] && release['label-info'][0] && release['label-info'][0].label && release['label-info'][0].label.name;
+      const country = release && release.country;
+      const genres  = (mb.genres || []).slice(0, 3).map(g => g.name).join(', ');
+      const tags    = (mb.tags   || []).sort((a,b) => b.count - a.count).slice(0, 3).map(t => t.name).join(', ');
+      const rating  = mb.rating && mb.rating.value ? mb.rating.value.toFixed(1) : null;
+
+      const metaRow = el.querySelector('.track-meta-row');
+      if (!metaRow) continue;
+      let html = '';
+      if (year)    html += metaEl('Jahr', year);
+      if (country) html += metaEl('Land', country);
+      if (label)   html += metaEl('Label', label);
+      if (genres)  html += metaEl('Genres', genres);
+      if (tags)    html += metaEl('Tags', tags);
+      if (rating)  html += metaEl('MB Rating', rating + '/5');
+      metaRow.innerHTML = html || metaRow.innerHTML;
+    } catch(e) { /* silently skip */ }
+  }
+}
+
+async function enrichArtistsMB(artists) {
+  for (let i = 0; i < artists.length; i++) {
+    const a = artists[i];
+    const el = document.querySelector(`[data-artist-id="${a.id}"]`);
+    if (!el) continue;
+    try {
+      await sleep(220);
+      const mb = await mbSearchArtist(a.name);
+      if (!mb) continue;
+      const country    = mb.country || (mb.area && mb.area.name);
+      const beginYear  = mb['life-span'] && mb['life-span'].begin ? mb['life-span'].begin.slice(0,4) : null;
+      const endYear    = mb['life-span'] && mb['life-span'].end   ? mb['life-span'].end.slice(0,4)   : null;
+      const type       = mb.type;
+      const genres     = (mb.genres || []).slice(0, 3).map(g => g.name).join(', ');
+      const tags       = (mb.tags   || []).sort((a,b) => b.count - a.count).slice(0, 4).map(t => t.name).join(', ');
+      const rating     = mb.rating && mb.rating.value ? mb.rating.value.toFixed(1) : null;
+      const active     = beginYear ? (endYear ? `${beginYear}–${endYear}` : `seit ${beginYear}`) : null;
+
+      const metaRow = el.querySelector('.artist-meta-row');
+      if (!metaRow) continue;
+      let html = '';
+      if (type)    html += metaEl('Typ', type);
+      if (country) html += metaEl('Herkunft', country);
+      if (active)  html += metaEl('Aktiv', active);
+      if (genres)  html += metaEl('MB Genres', genres);
+      if (tags)    html += metaEl('Tags', tags);
+      if (rating)  html += metaEl('MB Rating', rating + '/5');
+      metaRow.innerHTML = html || metaRow.innerHTML;
+    } catch(e) { /* silently skip */ }
+  }
+}
+
+async function buildGenresMB(artists) {
+  const genreMap = {};
+
+  // First pass: Spotify genres (instant)
+  artists.forEach((a, i) => {
+    const w = artists.length - i;
+    (a.genres || []).forEach(g => {
+      if (!genreMap[g]) genreMap[g] = { score: 0, source: 'spotify' };
+      genreMap[g].score += w;
+    });
+  });
+
+  // Second pass: MusicBrainz genres (async, update as they come in)
+  for (let i = 0; i < Math.min(artists.length, 20); i++) {
+    const a = artists[i];
+    const w = artists.length - i;
+    try {
+      await sleep(250);
+      const mb = mbArtistCache[a.name]; // use already-fetched cache
+      const mbArt = mb || await mbSearchArtist(a.name);
+      if (!mbArt) continue;
+      const mbGenres = [...(mbArt.genres || []), ...(mbArt.tags || []).filter(t => t.count > 1)];
+      mbGenres.forEach(g => {
+        const name = g.name;
+        if (!genreMap[name]) genreMap[name] = { score: 0, source: 'mb' };
+        else if (genreMap[name].source === 'spotify') genreMap[name].source = 'both';
+        genreMap[name].score += w * (g.count ? Math.min(g.count, 5) : 1);
+      });
+      // Re-render genres progressively
+      const sorted = Object.entries(genreMap).sort((a,b) => b[1].score - a[1].score).slice(0, 60);
+      renderGenres(null, sorted);
+    } catch(e) { /* skip */ }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LAST.FM
+// ═══════════════════════════════════════════════════════════════
 async function loadLastfm() {
   const user = document.getElementById('lfm-username').value.trim();
   if (!user) { showError('Last.fm Username eingeben.'); return; }
@@ -749,35 +649,31 @@ async function lfmFetch(method, user, limit) {
   return data;
 }
 
-// ── IMPORT ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// IMPORT
+// ═══════════════════════════════════════════════════════════════
 async function handleImport(files) {
-  if (!files || files.length === 0) return;
+  if (!files || !files.length) return;
   setStatus('Verarbeite JSON-Dateien…');
-  const trackCounts  = {};
-  const artistCounts = {};
+  const trackCounts = {}, artistCounts = {};
   let totalPlays = 0, totalMs = 0;
-
   for (const file of files) {
     try {
-      const text = await file.text();
-      const entries = JSON.parse(text);
+      const entries = JSON.parse(await file.text());
       for (const e of entries) {
-        const ms       = e.ms_played || 0;
-        const track    = e.master_metadata_track_name;
-        const artist   = e.master_metadata_album_artist_name;
-        if (!track || !artist || ms < 30000) continue; // skip <30s plays
-        totalPlays++;
-        totalMs += ms;
-        const tkey = `${track}|||${artist}`;
-        trackCounts[tkey]  = (trackCounts[tkey]  || 0) + 1;
+        const ms = e.ms_played || 0;
+        const track = e.master_metadata_track_name;
+        const artist = e.master_metadata_album_artist_name;
+        if (!track || !artist || ms < 30000) continue;
+        totalPlays++; totalMs += ms;
+        const key = `${track}|||${artist}`;
+        trackCounts[key]     = (trackCounts[key]     || 0) + 1;
         artistCounts[artist] = (artistCounts[artist] || 0) + 1;
       }
-    } catch(e) { showError('Fehler beim Lesen: ' + file.name); }
+    } catch(e) { showError('Fehler: ' + file.name); }
   }
-
-  const topTracks  = Object.entries(trackCounts).sort((a,b) => b[1]-a[1]).slice(0, 100);
-  const topArtists = Object.entries(artistCounts).sort((a,b) => b[1]-a[1]).slice(0, 100);
-
+  const topTracks  = Object.entries(trackCounts).sort((a,b)=>b[1]-a[1]).slice(0,100);
+  const topArtists = Object.entries(artistCounts).sort((a,b)=>b[1]-a[1]).slice(0,100);
   const hours = Math.round(totalMs / 3600000);
   const statsEl = document.getElementById('import-stats');
   statsEl.style.display = 'block';
@@ -786,22 +682,32 @@ async function handleImport(files) {
     `Stunden gehört: <span>${hours.toLocaleString('de')} h</span><br>` +
     `Einzigartige Tracks: <span>${Object.keys(trackCounts).length.toLocaleString('de')}</span><br>` +
     `Einzigartige Artists: <span>${Object.keys(artistCounts).length.toLocaleString('de')}</span>`;
-
   renderImportTracks(topTracks);
   renderImportArtists(topArtists);
   setStatus('');
 }
 
-// ── RENDER ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
 function renderTracks(items) {
   const list = document.getElementById('tracks-list');
   if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
   list.innerHTML = items.map((t, i) => `
-    <li class="track-item">
+    <li class="track-item" data-track-id="${esc(t.id)}">
       <span class="rank">${pad(i+1)}</span>
-      <span class="track-name" title="${esc(t.name)}">${esc(t.name)}</span>
-      <span class="track-artist" title="${esc(t.artists.map(a=>a.name).join(', '))}">${esc(t.artists.map(a=>a.name).join(', '))}</span>
-      <span class="play-count none">—</span>
+      <div class="track-main">
+        <div class="track-title-row">
+          <span class="track-name">${esc(t.name)}</span>
+          <span class="track-artist">${esc(t.artists.map(a=>a.name).join(', '))}</span>
+        </div>
+        <div class="track-meta-row">
+          ${metaEl('Album', t.album.name)}
+          ${t.duration_ms ? metaEl('Dauer', fmtDuration(t.duration_ms)) : ''}
+          ${t.popularity  ? metaEl('Popularität', t.popularity + '/100') : ''}
+          <span class="meta-tag loading">MB lädt…</span>
+        </div>
+      </div>
     </li>`).join('');
 }
 
@@ -809,35 +715,47 @@ function renderArtists(items) {
   const list = document.getElementById('artists-list');
   if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
   list.innerHTML = items.map((a, i) => `
-    <li class="artist-item">
+    <li class="artist-item" data-artist-id="${esc(a.id)}">
       <span class="rank">${pad(i+1)}</span>
-      <span class="artist-name">${esc(a.name)}</span>
-      <span class="artist-meta">${esc((a.genres||[]).slice(0,3).join(', '))}</span>
-      <span class="play-count none">—</span>
+      <div class="artist-main">
+        <div class="artist-title-row">
+          <span class="artist-name">${esc(a.name)}</span>
+          <span class="artist-sp-genres">${esc((a.genres||[]).slice(0,2).join(', '))}</span>
+        </div>
+        <div class="artist-meta-row">
+          ${a.popularity ? metaEl('Popularität', a.popularity + '/100') : ''}
+          ${a.followers  ? metaEl('Follower', a.followers.total.toLocaleString('de')) : ''}
+          <span class="meta-tag loading">MB lädt…</span>
+        </div>
+      </div>
     </li>`).join('');
 }
 
-function renderGenres(artistItems) {
+function renderGenres(artistItems, prebuilt) {
   const list = document.getElementById('genres-list');
-  if (!artistItems || !artistItems.length) { list.innerHTML = emptyRow(); return; }
-  // Count genre occurrences weighted by artist rank (top artist = most weight)
-  const genreCounts = {};
-  artistItems.forEach((a, i) => {
-    const weight = artistItems.length - i; // higher rank = more weight
-    (a.genres || []).forEach(g => {
-      genreCounts[g] = (genreCounts[g] || 0) + weight;
+  let entries = prebuilt;
+
+  if (artistItems && !prebuilt.length) {
+    // Quick render from Spotify only
+    const map = {};
+    artistItems.forEach((a, i) => {
+      const w = artistItems.length - i;
+      (a.genres||[]).forEach(g => { map[g] = (map[g]||0) + w; });
     });
-  });
-  const sorted = Object.entries(genreCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 50);
-  if (!sorted.length) { list.innerHTML = emptyRow(); return; }
-  const max = sorted[0][1];
-  list.innerHTML = sorted.map(([genre, score], i) => {
-    const pct = Math.round((score / max) * 100);
+    entries = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,60).map(([g,s])=>([g,{score:s,source:'spotify'}]));
+  }
+
+  if (!entries || !entries.length) { list.innerHTML = emptyRow(); return; }
+  const max = entries[0][1].score || entries[0][1];
+  list.innerHTML = entries.map(([genre, val], i) => {
+    const score  = typeof val === 'object' ? val.score  : val;
+    const source = typeof val === 'object' ? val.source : 'spotify';
+    const pct    = Math.round((score / max) * 100);
+    const srcLabel = source === 'both' ? 'SP+MB' : source === 'mb' ? 'MB' : 'SP';
     return `<li class="genre-item">
       <span class="rank">${pad(i+1)}</span>
       <span class="genre-name">${esc(genre)}</span>
+      <span class="genre-source">${srcLabel}</span>
       <span class="genre-bar-wrap"><span class="genre-bar" style="width:${pct}%"></span></span>
       <span class="genre-score">${score}</span>
     </li>`;
@@ -847,37 +765,46 @@ function renderGenres(artistItems) {
 function renderLfmTracks(items) {
   const list = document.getElementById('lfm-tracks-list');
   if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
-  list.innerHTML = items.map((t, i) => `
+  list.innerHTML = items.map((t,i) => `
     <li class="track-item">
       <span class="rank">${pad(i+1)}</span>
-      <span class="track-name" title="${esc(t.name)}">${esc(t.name)}</span>
-      <span class="track-artist">${esc(t.artist.name)}</span>
-      <span class="play-count lastfm">${Number(t.playcount).toLocaleString('de')} ×</span>
+      <div class="track-main">
+        <div class="track-title-row">
+          <span class="track-name">${esc(t.name)}</span>
+          <span class="track-artist">${esc(t.artist.name)}</span>
+        </div>
+        <div class="track-meta-row">${metaEl('Plays', Number(t.playcount).toLocaleString('de'))}</div>
+      </div>
     </li>`).join('');
 }
 
 function renderLfmArtists(items) {
   const list = document.getElementById('lfm-artists-list');
   if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
-  list.innerHTML = items.map((a, i) => `
+  list.innerHTML = items.map((a,i) => `
     <li class="artist-item">
       <span class="rank">${pad(i+1)}</span>
-      <span class="artist-name">${esc(a.name)}</span>
-      <span class="artist-meta"></span>
-      <span class="play-count lastfm">${Number(a.playcount).toLocaleString('de')} ×</span>
+      <div class="artist-main">
+        <div class="artist-title-row"><span class="artist-name">${esc(a.name)}</span></div>
+        <div class="artist-meta-row">${metaEl('Plays', Number(a.playcount).toLocaleString('de'))}</div>
+      </div>
     </li>`).join('');
 }
 
 function renderImportTracks(items) {
   const list = document.getElementById('import-tracks-list');
   if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
-  list.innerHTML = items.map(([key, count], i) => {
-    const [name, artist] = key.split('|||');
+  list.innerHTML = items.map(([key,count],i) => {
+    const [name,artist] = key.split('|||');
     return `<li class="track-item">
       <span class="rank">${pad(i+1)}</span>
-      <span class="track-name" title="${esc(name)}">${esc(name)}</span>
-      <span class="track-artist">${esc(artist)}</span>
-      <span class="play-count" style="color:#e5a000">${count.toLocaleString('de')} ×</span>
+      <div class="track-main">
+        <div class="track-title-row">
+          <span class="track-name">${esc(name)}</span>
+          <span class="track-artist">${esc(artist)}</span>
+        </div>
+        <div class="track-meta-row">${metaEl('Plays', count.toLocaleString('de'))}</div>
+      </div>
     </li>`;
   }).join('');
 }
@@ -885,31 +812,32 @@ function renderImportTracks(items) {
 function renderImportArtists(items) {
   const list = document.getElementById('import-artists-list');
   if (!items || !items.length) { list.innerHTML = emptyRow(); return; }
-  list.innerHTML = items.map(([name, count], i) => `
+  list.innerHTML = items.map(([name,count],i) => `
     <li class="artist-item">
       <span class="rank">${pad(i+1)}</span>
-      <span class="artist-name">${esc(name)}</span>
-      <span class="artist-meta"></span>
-      <span class="play-count" style="color:#e5a000">${count.toLocaleString('de')} ×</span>
+      <div class="artist-main">
+        <div class="artist-title-row"><span class="artist-name">${esc(name)}</span></div>
+        <div class="artist-meta-row">${metaEl('Plays', count.toLocaleString('de'))}</div>
+      </div>
     </li>`).join('');
 }
 
-// ── UI STATE ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// UI STATE
+// ═══════════════════════════════════════════════════════════════
 function switchTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('spotify-section').style.display = tab === 'spotify' ? 'block' : 'none';
-  document.getElementById('lastfm-section').style.display  = tab === 'lastfm'  ? 'block' : 'none';
-  document.getElementById('import-section').style.display  = tab === 'import'  ? 'block' : 'none';
-  // Auto-load Last.fm if username already saved
+  document.getElementById('tab-spotify').style.display = tab === 'spotify' ? 'block' : 'none';
+  document.getElementById('tab-lastfm').style.display  = tab === 'lastfm'  ? 'block' : 'none';
+  document.getElementById('tab-import').style.display  = tab === 'import'  ? 'block' : 'none';
   if (tab === 'lastfm' && document.getElementById('lfm-username').value.trim() &&
-      !document.getElementById('lfm-tracks-list').innerHTML) {
-    loadLastfm();
-  }
+      !document.getElementById('lfm-tracks-list').innerHTML) loadLastfm();
 }
 
 function switchSection(section, btn) {
+  currentSection = section;
   document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('section-tracks').style.display  = section === 'tracks'  ? 'block' : 'none';
@@ -941,29 +869,34 @@ function showLogin() {
   document.getElementById('main-content').style.display = 'none';
   document.getElementById('refresh-btn').style.display  = 'none';
   document.getElementById('logout-btn').style.display   = 'none';
-  document.getElementById('user-info').textContent      = '';
+  document.getElementById('user-info').textContent = '';
 }
 
 function setStatus(msg) {
   document.getElementById('status').innerHTML = msg
     ? `<span class="loading-text">${esc(msg)}</span>` : '';
 }
-
 function showError(msg) {
-  document.getElementById('error-container').innerHTML =
-    `<div class="error-msg">ERR: ${esc(msg)}</div>`;
+  document.getElementById('error-container').innerHTML = `<div class="error-msg">ERR: ${esc(msg)}</div>`;
 }
+function clearError() { document.getElementById('error-container').innerHTML = ''; }
 
-function clearError() {
-  document.getElementById('error-container').innerHTML = '';
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function metaEl(label, value) {
+  return `<span class="meta-tag">${label}: <span>${esc(String(value))}</span></span>`;
 }
-
+function fmtDuration(ms) {
+  const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 function pad(n) { return String(n).padStart(2,'0'); }
 function emptyRow() { return '<li style="color:var(--dim);padding:12px 0;font-size:11px">Keine Daten.</li>'; }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
 </html>
