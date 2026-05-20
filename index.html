@@ -781,59 +781,53 @@ function drawGenreShape(entries) {
   const canvas = document.getElementById('shape-canvas');
   if (!canvas) return;
 
-  // Canvas auf 340x340 hochskalieren für 15 Punkte + Labels
   canvas.width  = 340;
   canvas.height = 340;
-
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
   ctx.clearRect(0, 0, W, H);
 
-  if (!entries || entries.length < 3) {
+  if (!entries || entries.length < 2) {
     document.getElementById('shape-status').textContent = 'Zu wenige Genres.';
     return;
   }
 
-  // ── TOP 15, mit linearer Rang-Gewichtung: Platz 1 = 15 Punkte, Platz 15 = 1 Punkt
-  // Der raw score aus der Genre-Map wird dabei NICHT direkt genutzt —
-  // stattdessen bekommt jedes Genre ein Rang-Gewicht das den Platz widerspiegelt.
-  // So hat Platz 1 exakt 15× mehr Einfluss als Platz 15.
+  // ── TOP 15 mit linearen Rang-Gewichten (Platz 1 = 15, Platz 15 = 1)
   const available = entries.slice(0, 15);
   const N = available.length;
-  // Rang-Gewichte: Platz i (0-basiert) → Gewicht = (N - i)
   const ranked = available.map(([genre, val], i) => ({
-    genre,
-    val,
-    rankW: N - i,          // 15, 14, 13 … 1
-    rawScore: val.score,
+    genre, val, rankW: N - i, rank: i + 1,
   }));
-  const totalRankW = ranked.reduce((s, r) => s + r.rankW, 0); // = N*(N+1)/2
+  const totalRankW = ranked.reduce((s, r) => s + r.rankW, 0);
 
-  // ── ANZAHL ECKEN via HHI auf Rang-Gewichten (nicht raw scores)
+  // ── FORM-BESTIMMUNG via HHI auf Rang-Gewichten
   const hhi = ranked.reduce((s, r) => s + Math.pow(r.rankW / totalRankW, 2), 0);
-  const sides = Math.min(N, Math.max(3, Math.round(3 + (1 - hhi) * 12))); // 3..15
+  // hhi: 1 = ein Genre dominiert alles → einfache Form
+  //      niedrig = sehr divers → viele Ecken
+  // Skala: hhi 1.0→0.07 maps to sides 1→8
+  let sides;
+  if      (hhi > 0.75) sides = 1;   // Linie
+  else if (hhi > 0.55) sides = 2;   // Linie (zwei Pole)
+  else if (hhi > 0.40) sides = 3;   // Dreieck
+  else if (hhi > 0.28) sides = 4;   // Rechteck
+  else if (hhi > 0.18) sides = 5;   // Pentagon
+  else if (hhi > 0.12) sides = 6;   // Hexagon
+  else if (hhi > 0.08) sides = 8;   // Oktagon
+  else                 sides = 12;  // Dodekaeder / Kreis
 
-  // ── RADIUS je Ecke: proportional zum Rang-Gewicht des zugeordneten Genres
-  // Platz 1 bekommt den größten Radius, Platz 15 den kleinsten.
-  const maxRankW = ranked[0].rankW; // = N
-  const MIN_R = 55, MAX_R = 130;
-  // Jede der `sides` Ecken bekommt das Genre mit dem entsprechenden Rang zugewiesen
-  // (wrap-around falls sides < N)
-  const radii = [];
-  for (let i = 0; i < sides; i++) {
-    const r = ranked[i] || ranked[i % N];
-    radii.push(MIN_R + (r.rankW / maxRankW) * (MAX_R - MIN_R));
-  }
-
-  // ── DOMINANZ des Top-Genres (Rang-basiert)
-  const dominance = ranked[0].rankW / totalRankW;
-
-  // ── NISCHEN-SCORE: Genres die nur in 1 Quelle auftauchen, gewichtet nach Rang
+  // ── NISCHEN-SCORE (rang-gewichtet)
   const nicheRankW = ranked.filter(r => r.val.sources.size === 1).reduce((s, r) => s + r.rankW, 0);
   const nicheRatio = nicheRankW / totalRankW;
-  const irregularity = nicheRatio * 0.35;
 
-  // ── FARBE: Quell-Mix, nach Rang-Gewicht gewichtet
+  // ── KONSISTENZ (rang-gewichtet)
+  const consistencyW = ranked.filter(r => r.val.sources.size >= 2).reduce((s, r) => s + r.rankW, 0);
+  const consistency = consistencyW / totalRankW;
+
+  // ── DOMINANZ
+  const dominance = ranked[0].rankW / totalRankW;
+
+  // ── FARBE: Quell-Mix rang-gewichtet
   let spW = 0, lfmW = 0, mbW = 0;
   ranked.forEach(r => {
     const w = r.rankW / totalRankW;
@@ -847,133 +841,167 @@ function drawGenreShape(entries) {
   const cg = Math.round(0xb9 * spW + 0x10 * lfmW + 0x6f * mbW);
   const cb = Math.round(0x54 * spW + 0x07 * lfmW + 0xff * mbW);
   const shapeColor = `rgb(${cr},${cg},${cb})`;
-
-  // ── TRANSPARENZ: Konsistenz, nach Rang-Gewicht
-  const consistencyW = ranked.filter(r => r.val.sources.size >= 2).reduce((s, r) => s + r.rankW, 0);
-  const consistency = consistencyW / totalRankW;
   const alpha = 0.10 + consistency * 0.28;
 
-  // ── PUNKTE BERECHNEN
-  const cx = W / 2, cy = H / 2;
-  const seed = ranked.map(r => r.genre.charCodeAt(0) || 0).reduce((a, b) => a + b, 0);
-  const pts = [];
-  for (let i = 0; i < sides; i++) {
-    const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
-    // Verformung per Ecke: deterministisch aus seed + rang
-    const noise = irregularity * Math.sin((seed + i * 137.508) * 0.09);
-    const r2 = radii[i] * (1 + noise);
-    pts.push({
-      x: cx + r2 * Math.cos(angle),
-      y: cy + r2 * Math.sin(angle),
-      r: radii[i],
-      genre: ranked[i] ? ranked[i].genre : '',
-      rankW: ranked[i] ? ranked[i].rankW : 0,
+  const baseR = 100; // fester Basis-Radius für saubere Formen
+
+  // ── PUNKTE: perfekt symmetrische Polygon-Ecken
+  function polyPts(n, r) {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+      pts.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
+    }
+    return pts;
+  }
+
+  // ── ZEICHNEN HELPER
+  function drawPoly(pts, fill, stroke, lw) {
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.closePath();
+    if (fill)   { ctx.fillStyle = fill;     ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw || 1.5; ctx.stroke(); }
+  }
+
+  // ── ZEICHNEN: Gitter-Ringe (konzentrisch, gleiche Form)
+  ctx.setLineDash([2, 6]);
+  [0.35, 0.6, 0.85, 1.0].forEach(f => {
+    const gpts = sides === 1
+      ? null
+      : sides === 2
+        ? [{ x: cx - baseR * f, y: cy }, { x: cx + baseR * f, y: cy }]
+        : polyPts(sides, baseR * f);
+    if (!gpts) return;
+    ctx.beginPath();
+    ctx.moveTo(gpts[0].x, gpts[0].y);
+    gpts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+    if (sides > 2) ctx.closePath();
+    ctx.strokeStyle = '#1e1e1e';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // ── ZEICHNEN: Achsen vom Zentrum
+  if (sides >= 3) {
+    polyPts(sides, baseR + 14).forEach(p => {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(p.x, p.y);
+      ctx.strokeStyle = '#1e1e1e';
+      ctx.lineWidth = 1;
+      ctx.stroke();
     });
   }
 
-  // Mittlerer Radius für Gitter
-  const avgR = radii.reduce((s, r) => s + r, 0) / radii.length;
-
-  // ── ZEICHNEN: Konzentrische Gitter-Ringe
-  ctx.lineWidth = 1;
-  for (let ring = 1; ring <= 4; ring++) {
+  // ── SONDERFALL: Linie (sides 1 oder 2)
+  if (sides <= 2) {
+    // Linie von links nach rechts
+    const x1 = cx - baseR, x2 = cx + baseR;
     ctx.beginPath();
-    ctx.arc(cx, cy, (avgR * ring) / 4, 0, 2 * Math.PI);
-    ctx.strokeStyle = ring === 4 ? '#2a2a2a' : '#1a1a1a';
+    ctx.moveTo(x1, cy);
+    ctx.lineTo(x2, cy);
+    ctx.strokeStyle = shapeColor;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
+    // Endpunkte
+    [x1, x2].forEach(x => {
+      ctx.beginPath();
+      ctx.arc(x, cy, 5, 0, 2 * Math.PI);
+      ctx.fillStyle = shapeColor;
+      ctx.fill();
+    });
+    // Labels: Top-Genre links, zweites rechts
+    ctx.font = '9px Courier New';
+    ctx.fillStyle = '#aaa';
+    ctx.textAlign = 'center';
+    if (ranked[0]) ctx.fillText(ranked[0].genre.slice(0, 16), x1, cy - 14);
+    if (ranked[1]) ctx.fillText(ranked[1].genre.slice(0, 16), x2, cy - 14);
+  } else {
+    // ── NORMALES POLYGON
+    const pts = polyPts(sides, baseR);
+
+    // Gefüllte Form
+    drawPoly(pts,
+      shapeColor.replace('rgb(', 'rgba(').replace(')', `,${alpha})`),
+      shapeColor, 2);
+
+    // Ecken-Punkte + Labels
+    pts.forEach((p, i) => {
+      const r = ranked[i % N];
+      if (!r) return;
+
+      // Punkt-Größe nach Rang
+      const dotR = 2.5 + (r.rankW / N) * 4;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, dotR, 0, 2 * Math.PI);
+      ctx.fillStyle = shapeColor;
+      ctx.fill();
+
+      // Label außen
+      const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
+      const dist  = baseR + 20 + (r.rankW / N) * 8;
+      const lx = cx + dist * Math.cos(angle);
+      const ly = cy + dist * Math.sin(angle);
+
+      const fontSize = 8 + Math.round((r.rankW / N) * 2);
+      const brightness = Math.round(60 + (r.rankW / N) * 110);
+      ctx.font = `${fontSize}px Courier New`;
+      ctx.fillStyle = `rgb(${brightness},${brightness},${brightness})`;
+      ctx.textAlign = lx > cx + 10 ? 'left' : lx < cx - 10 ? 'right' : 'center';
+      const label = r.genre.length > 13 ? r.genre.slice(0, 12) + '…' : r.genre;
+      ctx.fillText(label, lx, ly + fontSize * 0.35);
+
+      ctx.font = '7px Courier New';
+      ctx.fillStyle = `rgba(${brightness},${brightness},${brightness},0.4)`;
+      ctx.fillText(`#${r.rank}`, lx, ly + fontSize * 0.35 + 9);
+    });
   }
 
-  // ── ZEICHNEN: Achsen vom Zentrum zu jedem Punkt
-  ctx.strokeStyle = '#1e1e1e';
-  ctx.lineWidth = 1;
-  for (let i = 0; i < sides; i++) {
-    const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + (avgR + 20) * Math.cos(angle), cy + (avgR + 20) * Math.sin(angle));
-    ctx.stroke();
-  }
+  // ── FORM-NAME für Status + Beschreibung
+  const shapeNames = { 1:'Linie', 2:'Linie', 3:'Dreieck', 4:'Rechteck', 5:'Pentagon', 6:'Hexagon', 8:'Oktagon', 12:'Kreis' };
+  const shapeName = shapeNames[sides] || `${sides}-Eck`;
 
-  // ── ZEICHNEN: Innere Referenz-Form (gleichmäßig, Durchschnitt-Radius)
-  ctx.beginPath();
-  for (let i = 0; i < sides; i++) {
-    const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
-    const x = cx + avgR * Math.cos(angle);
-    const y = cy + avgR * Math.sin(angle);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  }
-  ctx.closePath();
-  ctx.strokeStyle = '#2a2a2a';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([3, 5]);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  // ── FORM-TEXTE: vorgefertigt, jede Form hat eine Persönlichkeitsbeschreibung
+  const shapeTexts = {
+    'Linie': `Du lebst in einem Genre-Universum. Ein Sound, ein Lifestyle — alles andere ist Hintergrundgeräusch. Wahrscheinlich kennst du jeden Track deines Lieblingsartists auswendig und hast klare Meinungen darüber, wer „es noch nicht gecheckt hat". Konsistent bis zur Obsession.`,
+    'Dreieck': `Drei Pole, die alles tragen. Dein Geschmack ist fokussiert aber nicht blind — du weißt was du willst, erlaubst dir aber kleine Ausflüge. Dreiecke sind stabil und stark. Du bist musikalisch geerdet, nicht leicht zu überraschen, aber wenn dich ein neuer Track trifft, trifft er hart.`,
+    'Rechteck': `Ausgewogen, strukturiert, verlässlich. Vier Genres, vier Stimmungen — für jeden Moment die richtige Playlist. Du bist der Freund, den alle um Musikempfehlungen fragen. Nicht weil du alles hörst, sondern weil du weißt was gut ist. Solide Grundlage, manchmal überraschend tief.`,
+    'Pentagon': `Fünf Ecken — du bist vielseitig aber nicht planlos. Dein Geschmack hat ein Zentrum das man spürt, auch wenn die Ausläufer weit reichen. Wahrscheinlich entdeckst du regelmäßig neue Subgenres die sich trotzdem sofort richtig anfühlen. Ein Fünfeck ist keine Zufallsform — das ist Geschmack mit System.`,
+    'Hexagon': `Das Hexagon ist die effizienteste Form der Natur — Bienen bauen es aus einem Grund. Dein Musikgeschmack fühlt sich ähnlich an: organisch gewachsen, dicht gepackt, ohne Lücken. Sechs Genres die perfekt ineinandergreifen. Andere würden es eklektisch nennen, du nennst es Alltag.`,
+    'Oktagon': `Acht Seiten — du grenzt dich kaum noch ab. Dein Musikgeschmack ist ein offenes System: neue Sounds kommen rein, alte bleiben trotzdem. Wahrscheinlich hast du Spotify-Wrapped Überraschungen die selbst dich überraschen. Das Oktagon steht kurz vor dem Kreis — fast grenzenlos.`,
+    'Kreis': `Du hörst alles. Wirklich alles. Kein Genre ist dir fremd, kein Subgenre zu nischig. Ein Kreis hat keine Ecken — also keine Grenzen. Du bist der Mensch dessen Shuffle-Playlist andere in Schockstarre versetzt. Nicht weil sie schlecht ist, sondern weil niemand versteht wie das zusammenpasst. Aber es passt.`,
+  };
 
-  // ── ZEICHNEN: Hauptform (gefüllt)
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.closePath();
-  ctx.fillStyle = shapeColor.replace('rgb(', `rgba(`).replace(')', `,${alpha})`);
-  ctx.fill();
-  ctx.strokeStyle = shapeColor;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // ── ZEICHNEN: Punkte + Labels
-  pts.forEach((p, i) => {
-    if (!p.genre) return;
-    // Punkt-Größe proportional zum Rang-Gewicht: Platz 1 groß, Platz 15 klein
-    const dotR = 2 + (p.rankW / maxRankW) * 4; // 2..6px
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, dotR, 0, 2 * Math.PI);
-    ctx.fillStyle = shapeColor;
-    ctx.fill();
-
-    // Label-Position: etwas weiter außen als der Punkt
-    const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
-    const labelDist = p.r + 18 + (p.rankW / maxRankW) * 8;
-    const lx = cx + labelDist * Math.cos(angle);
-    const ly = cy + labelDist * Math.sin(angle);
-
-    // Schriftgröße: Platz 1 = 10px, Platz 15 = 8px
-    const fontSize = 8 + Math.round((p.rankW / maxRankW) * 2);
-    ctx.font = `${fontSize}px Courier New`;
-
-    // Helligkeit: Top-Genres heller
-    const brightness = Math.round(50 + (p.rankW / maxRankW) * 120);
-    ctx.fillStyle = `rgb(${brightness},${brightness},${brightness})`;
-
-    ctx.textAlign = lx > cx + 8 ? 'left' : lx < cx - 8 ? 'right' : 'center';
-    const label = p.genre.length > 14 ? p.genre.slice(0, 13) + '…' : p.genre;
-    ctx.fillText(label, lx, ly + fontSize * 0.35);
-
-    // Rang-Nummer klein daneben
-    ctx.font = '7px Courier New';
-    ctx.fillStyle = `rgba(${brightness},${brightness},${brightness},0.45)`;
-    ctx.fillText(`#${i + 1}`, lx, ly + fontSize * 0.35 + 9);
-  });
+  const shapeText = shapeTexts[shapeName] || shapeTexts['Pentagon'];
 
   // ── TRAITS
-  const diversityLabel = sides <= 4 ? 'Sehr fokussiert' : sides <= 7 ? 'Ausgewogen' : sides <= 11 ? 'Vielfältig' : 'Eklektisch';
-  const intensityLabel = dominance > 0.35 ? 'Ein Genre dominiert' : dominance > 0.22 ? 'Klarer Schwerpunkt' : 'Gleichmäßig verteilt';
-  const nicheLabel = nicheRatio > 0.7 ? 'Sehr nischig' : nicheRatio > 0.4 ? 'Teils nischig' : 'Mainstreamaffin';
-  const consistencyLabel = consistency > 0.6 ? 'Kohärent & treu' : consistency > 0.3 ? 'Variabel' : 'Experimentell';
-  const topGenreNames = ranked.slice(0, 3).map(r => r.genre).join(', ');
+  const diversityLabel = sides <= 2 ? 'Mono-Genre' : sides <= 4 ? 'Fokussiert' : sides <= 6 ? 'Vielfältig' : 'Eklektisch';
+  const intensityLabel = dominance > 0.35 ? 'Ein Genre dominiert' : dominance > 0.22 ? 'Klarer Schwerpunkt' : 'Gleichmäßig';
+  const nicheLabel     = nicheRatio > 0.7  ? 'Sehr nischig'       : nicheRatio > 0.4  ? 'Teils nischig'    : 'Mainstreamaffin';
+  const consistencyLbl = consistency > 0.6 ? 'Kohärent & treu'    : consistency > 0.3 ? 'Variabel'         : 'Experimentell';
+  const topGenreNames  = ranked.slice(0, 3).map(r => r.genre).join(', ');
 
   document.getElementById('shape-traits').innerHTML = [
-    ['Ecken', `${sides} — ${diversityLabel}`],
-    ['Dominanz', intensityLabel],
-    ['Nischigkeit', nicheLabel],
-    ['Konsistenz', consistencyLabel],
-    ['Top 3', topGenreNames],
+    ['Form',       shapeName],
+    ['Breite',     `${diversityLabel}`],
+    ['Dominanz',   intensityLabel],
+    ['Nischigkeit',nicheLabel],
+    ['Konsistenz', consistencyLbl],
+    ['Top 3',      topGenreNames],
   ].map(([l, v]) => `
     <div class="shape-trait">
       <span class="trait-label">${l}</span>
       <span class="trait-value">${v}</span>
-    </div>`).join('');
+    </div>`).join('')
+  + `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+      <div style="font-size:9px;color:var(--dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Was das bedeutet</div>
+      <div style="font-size:11px;color:var(--mid);line-height:1.8">${shapeText}</div>
+    </div>`;
 
-  document.getElementById('shape-status').textContent = `${sides}-Eck · ${N} Genres · Rang-gewichtet`;
+  document.getElementById('shape-status').textContent = `${shapeName} · HHI ${hhi.toFixed(2)} · ${N} Genres`;
 }
 
 // ═══════════════════════════════════════════════════════════════
