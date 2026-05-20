@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MY SPOTIFY STATS</title>
 <style>
-  /* 5 SPECIFIC THEME PALETTES */
+  /* 5 SPECIFIC THEME PALETTES WITH SEPARATE HEADER BACKGROUNDS */
   :root {
     --bg: #1c1a27;
+    --bg-header: #0e0d14;
     --bg-card: #262335;
     --border: #36324c;
     --text-main: #f4ebd0;
     --text-muted: #a59ca8;
-    --accent: #ff6e40; /* Pop/Electro Retro Default */
+    --accent: #ff6e40;
     
     --src-lfm: #ef4444;
     --src-mb: #8b5cf6;
@@ -31,41 +32,48 @@
     transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
   }
 
-  #app { max-width: 1000px; margin: 0 auto; padding: 40px 24px 100px; }
+  #app { max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
 
-  /* HEADER STRUKTUR: LINKS STEHT DIE ÜBERSCHRIFT */
+  /* GIGANTISCHER, ABGETRENNTER HEADER */
   header {
+    background: var(--bg-header);
+    border-bottom: 2px solid var(--border);
+    padding: 30px 40px;
+    margin: 0 -24px 40px -24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 20px;
-    margin-bottom: 32px;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
 
   .main-title {
     font-family: 'Federal Escort', 'Arial Black', 'Impact', sans-serif;
-    font-size: 32px;
+    font-size: 48px;
     font-weight: 900;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     text-align: left;
+    line-height: 1;
   }
 
   .header-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
+    margin-left: auto; /* Zwingt die Elemente an die ganz rechte Seite */
   }
 
   #user-info { 
-    font-size: 13px; 
-    color: var(--text-muted); 
-    font-weight: 700;
+    font-size: 14px; 
+    color: var(--text-main); 
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em; 
+    letter-spacing: 0.08em; 
+    background: rgba(255,255,255,0.05);
+    padding: 8px 14px;
+    border: 1px solid var(--border);
   }
 
   /* BUTTONS & CONTROLS */
@@ -93,7 +101,7 @@
   }
   #login-btn:hover { background: var(--accent); color: #000; }
 
-  /* NAVIGATION MAIN BLOCKS */
+  /* NAVIGATION MAIN BLOCKS - KLANGPROFIL IST JETZT AN POS 2 */
   .main-nav {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
@@ -107,7 +115,7 @@
     border-color: var(--text-main);
   }
 
-  /* GLOBAL & SUB TIME RANGE PANEL */
+  /* CONTROL PANELS */
   .spotify-controls {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -134,13 +142,12 @@
     border-color: var(--accent);
   }
 
-  /* LIST ARCHITECTURE WITH IMAGES */
+  /* LIST ARCHITECTURE */
   .track-list, .artist-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
   
   .track-item, .artist-item {
     display: grid;
-    /* Spalten: Nummer (30px), Bild/Schallplatte (56px), Text-Inhalte (rest) */
-    grid-template-columns: 30px 56px 1fr;
+    grid-template-columns: 30px 60px 1fr;
     background: var(--bg-card);
     border: 1px solid var(--border);
     padding: 12px 16px;
@@ -150,11 +157,16 @@
   
   .rank { font-weight: 800; color: var(--text-muted); font-size: 15px; text-align: center; }
 
-  /* SCHALLPLATTEN (VINYL) STYLING */
+  /* ROTIERENDER SCHALLPLATTEN EFFECT (VINYL) */
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
   .vinyl-wrapper {
     position: relative;
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     background: repeating-radial-gradient(#111, #111 2px, #222 3px, #111 4px);
     border-radius: 50%;
     display: flex;
@@ -162,34 +174,35 @@
     justify-content: center;
     box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     border: 1px solid #000;
+    animation: spin 8s linear infinite; /* AKTIVIERTE ROTATION */
   }
   .vinyl-wrapper::before {
     content: '';
     position: absolute;
     width: 100%; height: 100%;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.3) 50%, rgba(255,255,255,0.08) 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.4) 50%, rgba(255,255,255,0.1) 100%);
     pointer-events: none;
   }
   .vinyl-cover {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid rgba(0,0,0,0.5);
+    border: 1px solid rgba(0,0,0,0.6);
   }
 
-  /* REINES KÜNSTLER-BILD (OHNE OVERLAY) */
+  /* REINES KÜNSTLER-BILD OHNE OVERLAY UND ROTATION */
   .artist-img {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     object-fit: cover;
     border-radius: 4px;
     border: 1px solid var(--border);
     box-shadow: 0 3px 6px rgba(0,0,0,0.3);
   }
 
-  /* TEXT DETAILS ALIGNMENT */
+  /* DETAILS */
   .track-main, .artist-main { display: flex; flex-direction: column; gap: 2px; }
   .track-title-row, .artist-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   .track-name, .artist-name { color: var(--text-main); font-size: 15px; font-weight: 600; }
@@ -215,10 +228,10 @@
 
   #genre-shape-section { background: var(--bg-card); border: 1px solid var(--border); padding: 32px; }
   .shape-wrap { display: flex; gap: 48px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
-  .shape-legend { flex: 1; min-width: 280px; }
-  .shape-trait { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .trait-label { font-size: 13px; color: var(--text-muted); }
-  .trait-value { font-size: 13px; color: var(--text-main); font-weight: 600; }
+  .shape-legend { flex: 1; min-width: 320px; }
+  .shape-trait { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .trait-label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+  .trait-value { font-size: 13px; color: var(--text-main); font-weight: 700; text-align: right; max-width: 220px; }
 
   .source-legend { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; font-size: 11px; font-weight: 600; }
   .src-dot { display: inline-block; width: 8px; height: 8px; margin-right: 6px; vertical-align: middle; }
@@ -236,17 +249,17 @@
 </style>
 </head>
 <body>
+
+<header>
+  <h1 class="main-title">MY SPOTIFY STATS</h1>
+  <div class="header-right">
+    <div id="user-info"></div>
+    <button id="refresh-btn" style="display:none" onclick="onRefresh()">Aktualisieren</button>
+    <button id="logout-btn"  style="display:none" onclick="logout()">Logout</button>
+  </div>
+</header>
+
 <div id="app">
-
-  <header>
-    <h1 class="main-title">MY SPOTIFY STATS</h1>
-    <div class="header-right">
-      <div id="user-info"></div>
-      <button id="refresh-btn" style="display:none" onclick="onRefresh()">Aktualisieren</button>
-      <button id="logout-btn"  style="display:none" onclick="logout()">Logout</button>
-    </div>
-  </header>
-
   <div id="login-screen">
     <button id="login-btn" onclick="startLogin()">Mit Spotify verbinden</button>
     <div style="font-size:12px; color:var(--text-muted)">Redirect URI: <code id="redirect-uri-display"></code></div>
@@ -258,9 +271,9 @@
 
     <nav class="main-nav">
       <button class="active" onclick="switchTab('spotify', this)">Spotify</button>
+      <button onclick="switchTab('profile', this)">Klangprofil</button>
       <button onclick="switchTab('lastfm', this)">Last.fm</button>
       <button onclick="switchTab('import', this)">Import</button>
-      <button onclick="switchTab('profile', this)">Klangprofil</button>
       <button onclick="switchTab('genres', this)">Genres</button>
     </nav>
 
@@ -297,14 +310,27 @@
       </div>
     </div>
 
+    <div id="tab-profile" class="content-tab-section">
+      <div id="genre-shape-section">
+        <div class="section-header" style="border:none; margin-bottom:24px;">
+          <span>Dein Geometrisches Klang-Profil</span>
+          <span id="shape-status" style="font-size:11px;color:var(--text-muted)">Berechne Tiefenanalyse…</span>
+        </div>
+        <div class="shape-wrap">
+          <canvas id="shape-canvas" width="340" height="340"></canvas>
+          <div class="shape-legend"><div id="shape-traits"></div></div>
+        </div>
+      </div>
+    </div>
+
     <div id="tab-lastfm" class="content-tab-section">
       <div class="spotify-controls" style="flex-direction:row; justify-content: space-between; align-items:center;">
         <input id="lfm-username" type="text" placeholder="Last.fm Username" spellcheck="false"/>
         <button onclick="loadLastfm()">Daten laden</button>
       </div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
-        <div><div class="section-header">Top Tracks</div><ul class="track-list" id="lfm-tracks-list"></ul></div>
-        <div><div class="section-header">Top Artists</div><ul class="artist-list" id="lfm-artists-list"></ul></div>
+        <div><div class="section-header">Top Tracks (Last.fm)</div><ul class="track-list" id="lfm-tracks-list"></ul></div>
+        <div><div class="section-header">Top Artists (Last.fm)</div><ul class="artist-list" id="lfm-artists-list"></ul></div>
       </div>
     </div>
 
@@ -318,19 +344,6 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
         <div><div class="section-header">Top Tracks</div><ul class="track-list" id="import-tracks-list"></ul></div>
         <div><div class="section-header">Top Artists</div><ul class="artist-list" id="import-artists-list"></ul></div>
-      </div>
-    </div>
-
-    <div id="tab-profile" class="content-tab-section">
-      <div id="genre-shape-section">
-        <div class="section-header" style="border:none; margin-bottom:24px;">
-          <span>Dein Geometrisches Klang-Profil</span>
-          <span id="shape-status" style="font-size:11px;color:var(--text-muted)">Wird geladen…</span>
-        </div>
-        <div class="shape-wrap">
-          <canvas id="shape-canvas" width="340" height="340"></canvas>
-          <div class="shape-legend"><div id="shape-traits"></div></div>
-        </div>
       </div>
     </div>
 
@@ -379,10 +392,9 @@ if (_lfu) document.getElementById('lfm-username').value = _lfu;
   } else { showLogin(); }
 })();
 
-// THEME CONFIGURATION PIPELINE
 function updateThemeColors(p) {
   const r = document.documentElement;
-  r.style.setProperty('--bg', p.bg); r.style.setProperty('--bg-card', p.card);
+  r.style.setProperty('--bg', p.bg); r.style.setProperty('--bg-header', p.header); r.style.setProperty('--bg-card', p.card);
   r.style.setProperty('--text-main', p.text); r.style.setProperty('--text-muted', p.muted);
   r.style.setProperty('--accent', p.accent); r.style.setProperty('--border', p.border);
 }
@@ -390,11 +402,11 @@ function updateThemeColors(p) {
 function detectAndApplyTheme(genreString) {
   const str = genreString.toLowerCase();
   const palettes = {
-    pop:    { bg: '#1c1a27', card: '#262335', text: '#f4ebd0', muted: '#a59ca8', accent: '#ff6e40', border: '#36324c' }, // Retro
-    rock:   { bg: '#060709', card: '#0f111a', text: '#e6edf3', muted: '#7d8590', accent: '#da3633', border: '#21262d' }, // Dark Night
-    indie:  { bg: '#120b24', card: '#1d143a', text: '#e1d5f5', muted: '#9683b5', accent: '#ff71ce', border: '#2f2256' }, // Vaporwave
-    jazz:   { bg: '#161412', card: '#231f1b', text: '#f5eedc', muted: '#8c8275', accent: '#c99e63', border: '#36302b' }, // Neutral Retro
-    chill:  { bg: '#0b0914', card: '#141226', text: '#e2e1e9', muted: '#797593', accent: '#00f0ff', border: '#221f3b' }  // Synthwave Neutral
+    pop:    { bg: '#1c1a27', header: '#0e0d14', card: '#262335', text: '#f4ebd0', muted: '#a59ca8', accent: '#ff6e40', border: '#36324c' },
+    rock:   { bg: '#060709', header: '#010203', card: '#0f111a', text: '#e6edf3', muted: '#7d8590', accent: '#da3633', border: '#21262d' },
+    indie:  { bg: '#120b24', header: '#070410', card: '#1d143a', text: '#e1d5f5', muted: '#9683b5', accent: '#ff71ce', border: '#2f2256' },
+    jazz:   { bg: '#161412', header: '#0b0a09', card: '#231f1b', text: '#f5eedc', muted: '#8c8275', accent: '#c99e63', border: '#36302b' },
+    chill:  { bg: '#0b0914', header: '#040308', card: '#141226', text: '#e2e1e9', muted: '#797593', accent: '#00f0ff', border: '#221f3b' }
   };
 
   if (str.includes('rock') || str.includes('metal') || str.includes('punk') || str.includes('goth')) {
@@ -406,11 +418,11 @@ function detectAndApplyTheme(genreString) {
   } else if (str.includes('chill') || str.includes('ambient') || str.includes('lo-fi')) {
     updateThemeColors(palettes.chill);
   } else {
-    updateThemeColors(palettes.pop); // Default / Pop / Electro
+    updateThemeColors(palettes.pop);
   }
 }
 
-// OAUTH LOGIC
+// OAUTH
 function b64url(buf) { return btoa(String.fromCharCode(...buf)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,''); }
 async function startLogin() {
   const v = b64url(crypto.getRandomValues(new Uint8Array(32)));
@@ -452,7 +464,6 @@ async function getToken() {
 }
 function logout() { localStorage.clear(); showLogin(); }
 
-// DATA EXTRACTION
 async function spFetch(endpoint) {
   const token = await getToken();
   const resp = await fetch(SP_API + endpoint, { headers: { Authorization: 'Bearer ' + token } });
@@ -473,7 +484,6 @@ async function loadAll() {
   } catch(e) { setStatus(''); showError(e.message); }
 }
 
-// MUSICBRAINZ EXTRACTION
 async function mbFetch(url) { const r = await fetch(url, { headers: MB_HEADERS }); return r.ok ? r.json() : null; }
 async function mbSearchRecording(title, artist) {
   const k = `${title}||${artist}`; if (mbTrackCache[k]) return mbTrackCache[k];
@@ -512,7 +522,6 @@ async function enrichArtistsMB(artists) {
   }
 }
 
-// GENRE ANALYSIS ENGINE
 function mergeGenre(map, name, score, source) {
   const n = name.toLowerCase().trim(); if (!n || n.length < 3) return;
   if (!map[n]) map[n] = { score: 0, sources: new Set() };
@@ -524,7 +533,6 @@ async function buildAllGenres(artists) {
   artists.forEach((a, i) => { (a.genres || []).forEach(g => mergeGenre(globalGenreMap, g, (artists.length - i) * 3, 'spotify')); });
   renderGenres(genreEntries(globalGenreMap));
 
-  // Async source enhancements
   for (let i = 0; i < Math.min(artists.length, 15); i++) {
     try {
       const a = artists[i];
@@ -541,7 +549,7 @@ async function buildAllGenres(artists) {
   drawGenreShape(entries);
 }
 
-// ENGINE VISUALISIERUNG
+// MAXIMAL AUSFÜHRLICHES KLANGPROFIL
 function drawGenreShape(entries) {
   const canvas = document.getElementById('shape-canvas'); if (!canvas) return;
   const ctx = canvas.getContext('2d'); const W = canvas.width, cx = W / 2, cy = W / 2;
@@ -559,38 +567,43 @@ function drawGenreShape(entries) {
 
   ctx.setLineDash([2, 4]);
   [0.4, 0.7, 1.0].forEach(f => {
-    const pts = polyPts(sides, 100 * f); ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y)); ctx.closePath();
+    const pts = polyPts(sides, 120 * f); ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y)); ctx.closePath();
     ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border'); ctx.stroke();
   });
   ctx.setLineDash([]);
 
-  const pts = polyPts(sides, 100);
+  const pts = polyPts(sides, 120);
   ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y)); ctx.closePath();
-  ctx.fillStyle = activeAccent + '22'; ctx.fill(); ctx.strokeStyle = activeAccent; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = activeAccent + '18'; ctx.fill(); ctx.strokeStyle = activeAccent; ctx.lineWidth = 2; ctx.stroke();
 
   pts.forEach((p, i) => {
     const r = av[i % N]; if (!r) return;
-    ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, 2*Math.PI); ctx.fillStyle = activeAccent; ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 2*Math.PI); ctx.fillStyle = activeAccent; ctx.fill();
     const a = (2 * Math.PI * i / sides) - Math.PI / 2;
-    const lx = cx + 120 * Math.cos(a), ly = cy + 120 * Math.sin(a);
-    ctx.font = '10px sans-serif'; ctx.fillStyle = 'white'; ctx.textAlign = lx > cx ? 'left' : 'right';
-    ctx.fillText(r[0], lx, ly);
+    const lx = cx + 140 * Math.cos(a), ly = cy + 140 * Math.sin(a);
+    ctx.font = 'bold 10px sans-serif'; ctx.fillStyle = 'var(--text-main)'; ctx.textAlign = lx > cx ? 'left' : 'right';
+    ctx.fillText(r[0].toUpperCase(), lx, ly);
   });
 
   const txt = av.map(r=>r[0]).join(' ');
-  const playmobil = txt.includes('rock')||txt.includes('metal') ? {n:'Ritter', d:'Laut & Unnachgiebig.'} : {n:'Polizist', d:'Klassisch & Zuverlässig.'};
-  const octonaut = txt.includes('jazz')||txt.includes('class') ? {n:'Barnacles', d:'Ruhig & Tiefgründig.'} : {n:'Kwazii', d:'Wild & Abenteuerlustig.'};
+  const playmobil = txt.includes('rock')||txt.includes('metal')||txt.includes('punk') ? {n:'Ritter / Rebell', d:'Laut, kantig, unnachgiebig und energisch strukturiert.'} : txt.includes('indie')||txt.includes('alternative') ? {n:'Entdecker / Abenteurer', d:'Tiefgründig, unkonventionell und melancholisch angehaucht.'} : {n:'Pop-Strategist', d:'Perfekt ausbalanciert, rhythmisch und eingängig.'};
+  const octonaut = txt.includes('jazz')||txt.includes('class')||txt.includes('ambient') ? {n:'Käpt\'n Barnacles', d:'Besonnen, tiefsinnig und hochgradig komplex strukturiert.'} : {n:'Kwazii', d:'Dynamisch, impulsiv und voller unerwarteter akustischer Wendungen.'};
 
-  const names = {3:'Dreieck', 4:'Rechteck', 5:'Pentagon', 6:'Hexagon'};
+  const names = {3:'Trigonometrisches Triangel', 4:'Symmetrisches Viereck', 5:'Pentagonale Matrix', 6:'Hexagonaler Kristall'};
+  
+  // AUSFÜHRLICHE DATA-TRAITS AUSGABE
   document.getElementById('shape-traits').innerHTML = [
-    ['Geometrie', names[sides] || sides+'-Eck'],
-    ['Playmobil', playmobil.n + ' - ' + playmobil.d],
-    ['Octonaut', octonaut.n + ' - ' + octonaut.d]
+    ['Geometrische Struktur', names[sides] || sides+'-Eck Struktur'],
+    ['Musikalische Vielfalt', entries.length + ' distinkte Subgenres identifiziert'],
+    ['Frequenz-Abdeckung', (sides * 15.4).toFixed(1) + '% harmonische Dichte'],
+    ['Klang-Symmetrie', (100 - (hhi*100)).toFixed(1) + '% strukturelle Balance'],
+    ['Playmobil Archetyp', `<strong>${playmobil.n}</strong><br><span style="font-size:11px;color:var(--text-muted)">${playmobil.d}</span>`],
+    ['Octonauten Charakter', `<strong>${octonaut.n}</strong><br><span style="font-size:11px;color:var(--text-muted)">${octonaut.d}</span>`]
   ].map(([l, v]) => `<div class="shape-trait"><span class="trait-label">${l}</span><span class="trait-value">${v}</span></div>`).join('');
-  document.getElementById('shape-status').textContent = names[sides] || 'Profil';
+  
+  document.getElementById('shape-status').textContent = names[sides] || 'Profil berechnet';
 }
 
-// LAST.FM & STREAMING CORES
 async function loadLastfm() {
   const u = document.getElementById('lfm-username').value.trim(); if (!u) return;
   localStorage.setItem('lfm_username', u); setStatus('Lade Last.fm…');
@@ -621,12 +634,11 @@ async function handleImport(files) {
   setStatus('');
 }
 
-// RENDERING PIPELINES (SCHALLPLATTEN & KÜNSTLER-BILDER)
+// RENDERING PIPELINES WITH ROTATION & PLAYCOUNTS
 function renderTracks(items) {
   document.getElementById('tracks-list').innerHTML = (items||[]).map((t, i) => {
     const imgUrl = t.album?.images?.[2]?.url || t.album?.images?.[0]?.url || '';
     const imgHtml = `<div class="vinyl-wrapper">${imgUrl ? `<img src="${imgUrl}" class="vinyl-cover">` : ''}</div>`;
-    // Fix: Popularität wird sicher abgefangen, damit niemals "undefined" dasteht
     const popHtml = t.popularity ? metaEl('Popularität', t.popularity + '/100') : '';
     
     return `
@@ -669,6 +681,56 @@ function renderArtists(items) {
   }).join('') || emptyRow();
 }
 
+// LAST.FM: EXACT PLAYCOUNT (SCROBBLES) DISPLAY RESTORED
+function renderLfmTracks(items) {
+  document.getElementById('lfm-tracks-list').innerHTML = (items||[]).map((t,i) => {
+    const scrobbles = t.playcount ? Number(t.playcount).toLocaleString('de') : '0';
+    return `
+    <li class="track-item">
+      <span class="rank">${pad(i+1)}</span>
+      <div class="vinyl-wrapper"></div>
+      <div class="track-main">
+        <div class="track-title-row">
+          <span class="track-name">${esc(t.name)}</span>
+          <span class="track-artist">${esc(t.artist?.name)}</span>
+        </div>
+        <div class="track-meta-row">
+          ${metaEl('Scrobbles', scrobbles)}
+        </div>
+      </div>
+    </li>`;
+  }).join('') || emptyRow();
+}
+
+function renderLfmArtists(items) {
+  document.getElementById('lfm-artists-list').innerHTML = (items||[]).map((a,i) => {
+    const scrobbles = a.playcount ? Number(a.playcount).toLocaleString('de') : '0';
+    return `
+    <li class="artist-item">
+      <span class="rank">${pad(i+1)}</span>
+      <div class="artist-img" style="background:#222"></div>
+      <div class="artist-main">
+        <div class="artist-title-row">
+          <span class="artist-name">${esc(a.name)}</span>
+        </div>
+        <div class="artist-meta-row">
+          ${metaEl('Scrobbles', scrobbles)}
+        </div>
+      </div>
+    </li>`;
+  }).join('') || emptyRow();
+}
+
+function renderImportTracks(items) {
+  document.getElementById('import-tracks-list').innerHTML = (items||[]).map(([k,c],i) => { 
+    const [n,a] = k.split('|||'); 
+    return `<li class="track-item"><span class="rank">${pad(i+1)}</span><div class="vinyl-wrapper"></div><div class="track-main"><div class="track-title-row"><span class="track-name">${esc(n)}</span><span class="track-artist">${esc(a)}</span></div><div class="track-meta-row">${metaEl('Wiedergaben', c)}</div></div></li>`; 
+  }).join('') || emptyRow();
+}
+function renderImportArtists(items) {
+  document.getElementById('import-artists-list').innerHTML = (items||[]).map(([n,c],i) => `<li class="artist-item"><span class="rank">${pad(i+1)}</span><div class="artist-img" style="background:#222"></div><div class="artist-main"><div class="artist-title-row"><span class="artist-name">${esc(n)}</span></div><div class="artist-meta-row">${metaEl('Wiedergaben', c)}</div></div></li>`).join('') || emptyRow();
+}
+
 function renderGenres(entries) {
   if (!entries.length) return; const max = entries[0][1].score;
   document.getElementById('genres-list').innerHTML = entries.map(([g, v], i) => {
@@ -681,27 +743,13 @@ function renderGenres(entries) {
   }).join('');
 }
 
-function renderLfmTracks(items) {
-  document.getElementById('lfm-tracks-list').innerHTML = (items||[]).map((t,i) => `<li class="track-item"><span class="rank">${pad(i+1)}</span><div class="vinyl-wrapper"></div><div class="track-main"><div class="track-title-row"><span class="track-name">${esc(t.name)}</span><span class="track-artist">${esc(t.artist?.name)}</span></div></div></li>`).join('') || emptyRow();
-}
-function renderLfmArtists(items) {
-  document.getElementById('lfm-artists-list').innerHTML = (items||[]).map((a,i) => `<li class="artist-item"><span class="rank">${pad(i+1)}</span><div class="artist-img" style="background:#222"></div><div class="artist-main"><div class="artist-title-row"><span class="artist-name">${esc(a.name)}</span></div></div></li>`).join('') || emptyRow();
-}
-function renderImportTracks(items) {
-  document.getElementById('import-tracks-list').innerHTML = (items||[]).map(([k,c],i) => { const [n,a] = k.split('|||'); return `<li class="track-item"><span class="rank">${pad(i+1)}</span><div class="vinyl-wrapper"></div><div class="track-main"><div class="track-title-row"><span class="track-name">${esc(n)}</span><span class="track-artist">${esc(a)}</span></div></div></li>`; }).join('') || emptyRow();
-}
-function renderImportArtists(items) {
-  document.getElementById('import-artists-list').innerHTML = (items||[]).map(([n,c],i) => `<li class="artist-item"><span class="rank">${pad(i+1)}</span><div class="artist-img" style="background:#222"></div><div class="artist-main"><div class="artist-title-row"><span class="artist-name">${esc(n)}</span></div></div></li>`).join('') || emptyRow();
-}
-
-// PLATFORM ROUTERS
+// ROUTERS
 function switchTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.main-nav button').forEach(b => b.classList.remove('active')); btn.classList.add('active');
   document.querySelectorAll('.content-tab-section').forEach(s => s.classList.remove('active'));
   document.getElementById(`tab-${tab}`).classList.add('active');
   
-  // Zeige den globalen Zeitraum-Filter nur bei Spotify und beim Klangprofil an
   const globalFilter = document.getElementById('global-timeframe');
   if (tab === 'spotify' || tab === 'profile') {
     globalFilter.style.display = 'block';
