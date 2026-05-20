@@ -44,14 +44,14 @@
   }
 
   .site-title { 
-    font-size: 50px; 
+    font-size: 18px; 
     font-weight: 800; 
-    letter-spacing: 0.2em; 
+    letter-spacing: 0.15em; 
     color: var(--text); 
     text-transform: uppercase; 
     font-family: system-ui, -apple-system, sans-serif;
     display: inline-block;
-    transform: scaleX(1); /* Gestreckte Schriftart-Ästhetik */
+    transform: scaleX(1.4); /* Gestreckte Schriftart-Ästhetik */
     transform-origin: left;
   }
 
@@ -412,6 +412,9 @@ let currentTab     = 'spotify';
 let currentSection = 'tracks';
 let cachedArtists  = [];
 
+let isLoading = false;
+let spotifyRequestQueue = Promise.resolve();
+
 const mbTrackCache  = {};
 const mbArtistCache = {};
 
@@ -538,49 +541,61 @@ async function handleCallback(code) {
   }
 }
 
+let spotifyRequestQueue = Promise.resolve();
+
 async function fetchSP(endpoint, retry = 0) {
-  let token = localStorage.getItem('sp_access_token');
+  return spotifyRequestQueue = spotifyRequestQueue.then(async () => {
 
-  let resp = await fetch(`${SP_API}${endpoint}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`
+    let token = localStorage.getItem('sp_access_token');
+
+    const doRequest = async () => {
+      return fetch(`${SP_API}${endpoint}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    };
+
+    let resp = await doRequest();
+
+    // Token refresh
+    if (resp.status === 401) {
+      token = await refreshToken();
+      resp = await doRequest();
     }
-  });
 
-  // Token abgelaufen
-  if (resp.status === 401) {
-    token = await refreshToken();
+    // Spotify Rate Limit
+    if (resp.status === 429) {
+      const retryAfter =
+        parseInt(resp.headers.get('Retry-After')) || 3;
 
-    resp = await fetch(`${SP_API}${endpoint}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+      console.warn(
+        `Spotify Rate Limit (${endpoint}) – ${retryAfter}s warten`
+      );
+
+      setStatus(
+        `Spotify Limit erreicht – ${retryAfter}s warten…`
+      );
+
+      await sleep((retryAfter + 1) * 1000);
+
+      if (retry < 5) {
+        return fetchSP(endpoint, retry + 1);
       }
-    });
-  }
 
-  // Rate Limit erreicht
-  if (resp.status === 429) {
-    const retryAfter = parseInt(resp.headers.get('Retry-After')) || 2;
-
-    console.warn(`Spotify Rate Limit. Warte ${retryAfter}s...`);
-
-    setStatus(`Spotify Rate Limit – warte ${retryAfter}s…`);
-
-    await sleep(retryAfter * 1000);
-
-    // maximal 3 Wiederholungen
-    if (retry < 3) {
-      return fetchSP(endpoint, retry + 1);
+      throw new Error(
+        `Spotify Rate Limit dauerhaft erreicht`
+      );
     }
 
-    throw new Error('Spotify API Rate Limit erreicht. Bitte kurz warten.');
-  }
+    if (!resp.ok) {
+      throw new Error(
+        `Spotify API Error [${resp.status}]`
+      );
+    }
 
-  if (!resp.ok) {
-    throw new Error(`Spotify API Error [${resp.status}]`);
-  }
-
-  return resp.json();
+    return resp.json();
+  });
 }
 
 async function refreshToken() {
@@ -605,28 +620,70 @@ function logout() {
 function onRefresh() { loadAll(); }
 
 async function loadAll() {
+  if (isLoading) {
+    console.log('Schon am Laden...');
+    return;
+  }
+
+  isLoading = true;
+
   clearError();
+
   try {
     setStatus('Lade Profil…');
+
     const me = await fetchSP('/me');
-    document.getElementById('user-info').textContent = `${me.display_name || me.id} (${me.product})`;
-    
+
+    document.getElementById(
+      'user-info'
+    ).textContent =
+      `${me.display_name || me.id} (${me.product})`;
+
+    await sleep(500);
+
     setStatus('Lade Top Songs…');
-    const tracksData = await fetchSP(`/me/top/tracks?limit=30&time_range=${currentRange}`);
-    renderTracks(tracksData.items);
-    
+
+    const tracksData = await fetchSP(
+      `/me/top/tracks?limit=20&time_range=${currentRange}`
+    );
+
+    await sleep(700);
+
     setStatus('Lade Top Künstler…');
-    const artistsData = await fetchSP(`/me/top/artists?limit=30&time_range=${currentRange}`);
+
+    const artistsData = await fetchSP(
+      `/me/top/artists?limit=20&time_range=${currentRange}`
+    );
+
     cachedArtists = artistsData.items;
+
+    renderTracks(tracksData.items);
     renderArtists(artistsData.items);
 
     setStatus('Baue Genres auf…');
+
     await buildGenres(artistsData.items);
-    
-    // Hintergrund-Erweiterungen per MusicBrainz
-setTimeout(() => {
-  buildMBDataForTracks(tracksData.items);
-}, 1000);
+
+    // Hintergrund-Requests langsamer starten
+    setTimeout(() => {
+      buildMBDataForTracks(
+        tracksData.items.slice(0, 8)
+      );
+    }, 2000);
+
+    setTimeout(() => {
+      buildMBDataForArtists(
+        artistsData.items.slice(0, 8)
+      );
+    }, 5000);
+
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    isLoading = false;
+    setStatus('');
+  }
+}
 
 setTimeout(() => {
   buildMBDataForArtists(artistsData.items);
