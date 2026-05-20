@@ -220,10 +220,6 @@
 
   <!-- LOGIN -->
   <div id="login-screen">
-    <div>
-      <div class="login-label">Spotify Client ID</div>
-      <input id="client-id-input" type="text" placeholder="Deine Spotify App Client ID" autocomplete="off" spellcheck="false"/>
-    </div>
     <button id="login-btn" onclick="startLogin()">Login with Spotify</button>
     <div class="redirect-note">
       Redirect URI eintragen: <code id="redirect-uri-display"></code><br>
@@ -278,7 +274,7 @@
 
       <!-- GENRES -->
       <div id="section-genres" style="display:none">
-        <div class="section-header">Top Genres <span class="badge mb">MB</span> + Spotify</div>
+        <div class="section-header">Top Genres <span class="badge lfm">LFM</span> + Spotify</div>
         <ul class="genre-list" id="genres-list"></ul>
       </div>
 
@@ -334,6 +330,7 @@
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 const SCOPES       = 'user-top-read user-read-private user-read-recently-played user-library-read';
 const SP_API       = 'https://api.spotify.com/v1';
+const CLIENT_ID    = '677e7701a9f446cab1c7aa93df3c02f7';
 const LFM_KEY      = '0c6c1bcb14dad55db8b608031ac09521';
 const LFM_API      = 'https://ws.audioscrobbler.com/2.0/';
 const MB_API       = 'https://musicbrainz.org/ws/2';
@@ -352,8 +349,7 @@ const mbArtistCache = {};
 // INIT
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('redirect-uri-display').textContent = REDIRECT_URI;
-const _cid = localStorage.getItem('sp_client_id');
-if (_cid) document.getElementById('client-id-input').value = _cid;
+// Client ID ist hardcoded
 const _lfu = localStorage.getItem('lfm_username');
 if (_lfu) document.getElementById('lfm-username').value = _lfu;
 
@@ -382,8 +378,7 @@ async function pkceChallenge() {
 }
 
 async function startLogin() {
-  const clientId = document.getElementById('client-id-input').value.trim();
-  if (!clientId) { showError('Bitte Client ID eingeben.'); return; }
+  const clientId = CLIENT_ID;
   localStorage.setItem('sp_client_id', clientId);
   const { verifier, challenge } = await pkceChallenge();
   const state = b64url(crypto.getRandomValues(new Uint8Array(8)));
@@ -480,12 +475,14 @@ async function loadAll() {
     cachedArtists = artists.items;
     renderTracks(tracks.items);
     renderArtists(artists.items);
-    renderGenres(artists.items, []);
+    // Spotify genres sofort rendern (ohne leeres prebuilt-Array)
+    buildGenresFromSpotify(artists.items);
     setStatus('');
     // Enrich with MusicBrainz in background
     enrichTracksMB(tracks.items);
     enrichArtistsMB(artists.items);
-    buildGenresMB(artists.items);
+    // Last.fm tags für Genres (schnell, kein Rate-Limit-Problem)
+    buildGenresLfm(artists.items);
   } catch(e) { setStatus(''); showError(e.message); }
 }
 
@@ -586,10 +583,31 @@ async function enrichArtistsMB(artists) {
   }
 }
 
-async function buildGenresMB(artists) {
+// Sofortige Genre-Anzeige aus Spotify-Daten
+function buildGenresFromSpotify(artists) {
+  const map = {};
+  artists.forEach((a, i) => {
+    const w = artists.length - i;
+    (a.genres || []).forEach(g => {
+      if (!map[g]) map[g] = { score: 0, source: 'spotify' };
+      map[g].score += w;
+    });
+  });
+  const entries = Object.entries(map).sort((a,b) => b[1].score - a[1].score).slice(0, 60);
+  if (entries.length) {
+    renderGenres(null, entries);
+  } else {
+    // Keine Spotify-Genres → Placeholder zeigen bis Last.fm lädt
+    document.getElementById('genres-list').innerHTML =
+      '<li style="color:var(--dim);padding:12px 0;font-size:11px">Lade Genres via Last.fm…</li>';
+  }
+}
+
+// Genres über Last.fm Artist Tags — schnell und zuverlässig
+async function buildGenresLfm(artists) {
   const genreMap = {};
 
-  // First pass: Spotify genres (instant)
+  // Erst Spotify-Genres übernehmen
   artists.forEach((a, i) => {
     const w = artists.length - i;
     (a.genres || []).forEach(g => {
@@ -598,26 +616,34 @@ async function buildGenresMB(artists) {
     });
   });
 
-  // Second pass: MusicBrainz genres (async, update as they come in)
-  for (let i = 0; i < Math.min(artists.length, 20); i++) {
-    const a = artists[i];
-    const w = artists.length - i;
-    try {
-      await sleep(250);
-      const mb = mbArtistCache[a.name]; // use already-fetched cache
-      const mbArt = mb || await mbSearchArtist(a.name);
-      if (!mbArt) continue;
-      const mbGenres = [...(mbArt.genres || []), ...(mbArt.tags || []).filter(t => t.count > 1)];
-      mbGenres.forEach(g => {
-        const name = g.name;
-        if (!genreMap[name]) genreMap[name] = { score: 0, source: 'mb' };
-        else if (genreMap[name].source === 'spotify') genreMap[name].source = 'both';
-        genreMap[name].score += w * (g.count ? Math.min(g.count, 5) : 1);
-      });
-      // Re-render genres progressively
-      const sorted = Object.entries(genreMap).sort((a,b) => b[1].score - a[1].score).slice(0, 60);
-      renderGenres(null, sorted);
-    } catch(e) { /* skip */ }
+  // Dann Last.fm Tags parallel laden (je 5 gleichzeitig)
+  const BATCH = 5;
+  for (let i = 0; i < Math.min(artists.length, 30); i += BATCH) {
+    const batch = artists.slice(i, i + BATCH);
+    await Promise.all(batch.map(async (a, bi) => {
+      const rank = i + bi;
+      const w = artists.length - rank;
+      try {
+        const url = `${LFM_API}?method=artist.gettoptags&artist=${encodeURIComponent(a.name)}&api_key=${LFM_KEY}&format=json&autocorrect=1`;
+        const resp = await fetch(url);
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const tags = (data.toptags && data.toptags.tag) || [];
+        // Nur Tags mit count > 20 (sehr klare Genre-Tags)
+        tags.filter(t => Number(t.count) > 20).slice(0, 6).forEach(t => {
+          const name = t.name.toLowerCase();
+          // Spam-Tags ausfiltern
+          if (['seen live','favorite','favourites','love','00s','90s','80s','70s','under 2000 listeners'].includes(name)) return;
+          if (!genreMap[name]) genreMap[name] = { score: 0, source: 'lfm' };
+          else if (genreMap[name].source === 'spotify') genreMap[name].source = 'both';
+          else if (genreMap[name].source === 'lfm') genreMap[name].source = 'lfm';
+          genreMap[name].score += Math.round(w * (Number(t.count) / 100));
+        });
+      } catch(e) { /* skip */ }
+    }));
+    // Nach jedem Batch Genre-Liste aktualisieren
+    const sorted = Object.entries(genreMap).sort((a,b) => b[1].score - a[1].score).slice(0, 60);
+    if (sorted.length) renderGenres(null, sorted);
   }
 }
 
@@ -751,7 +777,7 @@ function renderGenres(artistItems, prebuilt) {
     const score  = typeof val === 'object' ? val.score  : val;
     const source = typeof val === 'object' ? val.source : 'spotify';
     const pct    = Math.round((score / max) * 100);
-    const srcLabel = source === 'both' ? 'SP+MB' : source === 'mb' ? 'MB' : 'SP';
+    const srcLabel = source === 'both' ? 'SP+LFM' : source === 'lfm' ? 'LFM' : 'SP';
     return `<li class="genre-item">
       <span class="rank">${pad(i+1)}</span>
       <span class="genre-name">${esc(genre)}</span>
