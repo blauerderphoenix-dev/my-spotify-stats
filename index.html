@@ -311,7 +311,7 @@
             <span id="shape-status" style="font-size:9px;color:var(--dim)">Wird berechnet…</span>
           </div>
           <div class="shape-wrap">
-            <canvas id="shape-canvas" width="220" height="220"></canvas>
+            <canvas id="shape-canvas" width="340" height="340" style="max-width:100%"></canvas>
             <div class="shape-legend">
               <div class="shape-legend-title">Form-Bedeutung</div>
               <div id="shape-traits"></div>
@@ -780,6 +780,11 @@ async function buildAllGenres(artists) {
 function drawGenreShape(entries) {
   const canvas = document.getElementById('shape-canvas');
   if (!canvas) return;
+
+  // Canvas auf 340x340 hochskalieren für 15 Punkte + Labels
+  canvas.width  = 340;
+  canvas.height = 340;
+
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
@@ -789,122 +794,186 @@ function drawGenreShape(entries) {
     return;
   }
 
-  const top = entries.slice(0, 12);
-  const totalScore = top.reduce((s, [, v]) => s + v.score, 0);
-  const maxScore = top[0][1].score;
+  // ── TOP 15, mit linearer Rang-Gewichtung: Platz 1 = 15 Punkte, Platz 15 = 1 Punkt
+  // Der raw score aus der Genre-Map wird dabei NICHT direkt genutzt —
+  // stattdessen bekommt jedes Genre ein Rang-Gewicht das den Platz widerspiegelt.
+  // So hat Platz 1 exakt 15× mehr Einfluss als Platz 15.
+  const available = entries.slice(0, 15);
+  const N = available.length;
+  // Rang-Gewichte: Platz i (0-basiert) → Gewicht = (N - i)
+  const ranked = available.map(([genre, val], i) => ({
+    genre,
+    val,
+    rankW: N - i,          // 15, 14, 13 … 1
+    rawScore: val.score,
+  }));
+  const totalRankW = ranked.reduce((s, r) => s + r.rankW, 0); // = N*(N+1)/2
 
-  // ── ANZAHL ECKEN: basierend auf Genre-Diversität (HHI-Index)
-  const hhi = top.reduce((s, [, v]) => s + Math.pow(v.score / totalScore, 2), 0);
-  // hhi nahe 1 = monopol (wenig Genres), nahe 0 = sehr divers
-  const sides = Math.round(3 + (1 - hhi) * 9); // 3 bis 12
+  // ── ANZAHL ECKEN via HHI auf Rang-Gewichten (nicht raw scores)
+  const hhi = ranked.reduce((s, r) => s + Math.pow(r.rankW / totalRankW, 2), 0);
+  const sides = Math.min(N, Math.max(3, Math.round(3 + (1 - hhi) * 12))); // 3..15
 
-  // ── GRÖSSE: wie dominant ist das Top-Genre
-  const dominance = maxScore / totalScore; // 0..1
-  const baseR = 50 + dominance * 50; // 50..100px
+  // ── RADIUS je Ecke: proportional zum Rang-Gewicht des zugeordneten Genres
+  // Platz 1 bekommt den größten Radius, Platz 15 den kleinsten.
+  const maxRankW = ranked[0].rankW; // = N
+  const MIN_R = 55, MAX_R = 130;
+  // Jede der `sides` Ecken bekommt das Genre mit dem entsprechenden Rang zugewiesen
+  // (wrap-around falls sides < N)
+  const radii = [];
+  for (let i = 0; i < sides; i++) {
+    const r = ranked[i] || ranked[i % N];
+    radii.push(MIN_R + (r.rankW / maxRankW) * (MAX_R - MIN_R));
+  }
 
-  // ── UNREGELMÄSSIGKEIT: Nischen-Score (wie viele Genres haben nur 1 Quelle)
-  const nicheRatio = top.filter(([, v]) => v.sources.size === 1).length / top.length;
-  const irregularity = nicheRatio * 0.45; // max 45% Verformung
+  // ── DOMINANZ des Top-Genres (Rang-basiert)
+  const dominance = ranked[0].rankW / totalRankW;
 
-  // ── FARBE: welche Quellen dominieren
-  let spScore = 0, lfmScore = 0, mbScore = 0;
-  top.forEach(([, v]) => {
-    if (v.sources.has('spotify')) spScore += v.score;
-    if (v.sources.has('lfm'))     lfmScore += v.score;
-    if (v.sources.has('mb'))      mbScore  += v.score;
+  // ── NISCHEN-SCORE: Genres die nur in 1 Quelle auftauchen, gewichtet nach Rang
+  const nicheRankW = ranked.filter(r => r.val.sources.size === 1).reduce((s, r) => s + r.rankW, 0);
+  const nicheRatio = nicheRankW / totalRankW;
+  const irregularity = nicheRatio * 0.35;
+
+  // ── FARBE: Quell-Mix, nach Rang-Gewicht gewichtet
+  let spW = 0, lfmW = 0, mbW = 0;
+  ranked.forEach(r => {
+    const w = r.rankW / totalRankW;
+    if (r.val.sources.has('spotify')) spW  += w;
+    if (r.val.sources.has('lfm'))     lfmW += w;
+    if (r.val.sources.has('mb'))      mbW  += w;
   });
-  const srcTotal = spScore + lfmScore + mbScore;
-  const spW = spScore / srcTotal, lfmW = lfmScore / srcTotal, mbW = mbScore / srcTotal;
-  // Mische Farben
-  const r = Math.round(0x1d * spW + 0xd5 * lfmW + 0x7c * mbW);
-  const g = Math.round(0xb9 * spW + 0x10 * lfmW + 0x6f * mbW);
-  const b = Math.round(0x54 * spW + 0x07 * lfmW + 0xff * mbW);
-  const shapeColor = `rgb(${r},${g},${b})`;
+  const srcTotal = spW + lfmW + mbW || 1;
+  spW /= srcTotal; lfmW /= srcTotal; mbW /= srcTotal;
+  const cr = Math.round(0x1d * spW + 0xd5 * lfmW + 0x7c * mbW);
+  const cg = Math.round(0xb9 * spW + 0x10 * lfmW + 0x6f * mbW);
+  const cb = Math.round(0x54 * spW + 0x07 * lfmW + 0xff * mbW);
+  const shapeColor = `rgb(${cr},${cg},${cb})`;
 
-  // ── TRANSPARENZ: Konsistenz = Anteil Genres mit 2+ Quellen
-  const consistency = top.filter(([, v]) => v.sources.size >= 2).length / top.length;
-  const alpha = 0.12 + consistency * 0.25;
+  // ── TRANSPARENZ: Konsistenz, nach Rang-Gewicht
+  const consistencyW = ranked.filter(r => r.val.sources.size >= 2).reduce((s, r) => s + r.rankW, 0);
+  const consistency = consistencyW / totalRankW;
+  const alpha = 0.10 + consistency * 0.28;
 
   // ── PUNKTE BERECHNEN
   const cx = W / 2, cy = H / 2;
-  // Seed aus Genre-Namen für reproduzierbare Verformung
-  const seed = top.map(([g]) => g.charCodeAt(0) || 0).reduce((a, b) => a + b, 0);
+  const seed = ranked.map(r => r.genre.charCodeAt(0) || 0).reduce((a, b) => a + b, 0);
   const pts = [];
   for (let i = 0; i < sides; i++) {
     const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
-    // Verformung: pseudo-random aber deterministisch
-    const noise = irregularity * Math.sin((seed + i * 137.5) * 0.1) ;
-    const r2 = baseR * (1 + noise);
-    pts.push({ x: cx + r2 * Math.cos(angle), y: cy + r2 * Math.sin(angle) });
+    // Verformung per Ecke: deterministisch aus seed + rang
+    const noise = irregularity * Math.sin((seed + i * 137.508) * 0.09);
+    const r2 = radii[i] * (1 + noise);
+    pts.push({
+      x: cx + r2 * Math.cos(angle),
+      y: cy + r2 * Math.sin(angle),
+      r: radii[i],
+      genre: ranked[i] ? ranked[i].genre : '',
+      rankW: ranked[i] ? ranked[i].rankW : 0,
+    });
   }
 
-  // ── ZEICHNEN: Hintergrund-Gitter
-  ctx.strokeStyle = '#1e1e1e';
+  // Mittlerer Radius für Gitter
+  const avgR = radii.reduce((s, r) => s + r, 0) / radii.length;
+
+  // ── ZEICHNEN: Konzentrische Gitter-Ringe
   ctx.lineWidth = 1;
-  for (let ring = 1; ring <= 3; ring++) {
+  for (let ring = 1; ring <= 4; ring++) {
     ctx.beginPath();
-    ctx.arc(cx, cy, (baseR * ring) / 3 + 10, 0, 2 * Math.PI);
+    ctx.arc(cx, cy, (avgR * ring) / 4, 0, 2 * Math.PI);
+    ctx.strokeStyle = ring === 4 ? '#2a2a2a' : '#1a1a1a';
     ctx.stroke();
   }
 
-  // ── ZEICHNEN: Achsen
-  ctx.strokeStyle = '#222';
+  // ── ZEICHNEN: Achsen vom Zentrum zu jedem Punkt
+  ctx.strokeStyle = '#1e1e1e';
+  ctx.lineWidth = 1;
   for (let i = 0; i < sides; i++) {
     const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
     ctx.beginPath();
     ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + (baseR + 16) * Math.cos(angle), cy + (baseR + 16) * Math.sin(angle));
+    ctx.lineTo(cx + (avgR + 20) * Math.cos(angle), cy + (avgR + 20) * Math.sin(angle));
     ctx.stroke();
   }
 
-  // ── ZEICHNEN: Gefüllte Form
+  // ── ZEICHNEN: Innere Referenz-Form (gleichmäßig, Durchschnitt-Radius)
+  ctx.beginPath();
+  for (let i = 0; i < sides; i++) {
+    const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
+    const x = cx + avgR * Math.cos(angle);
+    const y = cy + avgR * Math.sin(angle);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.strokeStyle = '#2a2a2a';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 5]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── ZEICHNEN: Hauptform (gefüllt)
   ctx.beginPath();
   ctx.moveTo(pts[0].x, pts[0].y);
   for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
   ctx.closePath();
-  ctx.fillStyle = shapeColor.replace('rgb', 'rgba').replace(')', `,${alpha})`);
+  ctx.fillStyle = shapeColor.replace('rgb(', `rgba(`).replace(')', `,${alpha})`);
   ctx.fill();
   ctx.strokeStyle = shapeColor;
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // ── ZEICHNEN: Punkte an Ecken mit Genre-Labels
+  // ── ZEICHNEN: Punkte + Labels
   pts.forEach((p, i) => {
-    if (!top[i]) return;
-    const [genre] = top[i];
+    if (!p.genre) return;
+    // Punkt-Größe proportional zum Rang-Gewicht: Platz 1 groß, Platz 15 klein
+    const dotR = 2 + (p.rankW / maxRankW) * 4; // 2..6px
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI);
+    ctx.arc(p.x, p.y, dotR, 0, 2 * Math.PI);
     ctx.fillStyle = shapeColor;
     ctx.fill();
-    // Label
-    ctx.font = '9px Courier New';
-    ctx.fillStyle = '#555';
-    const lx = cx + (baseR + 26) * Math.cos((2 * Math.PI * i / sides) - Math.PI / 2);
-    const ly = cy + (baseR + 26) * Math.sin((2 * Math.PI * i / sides) - Math.PI / 2);
-    ctx.textAlign = lx > cx + 5 ? 'left' : lx < cx - 5 ? 'right' : 'center';
-    ctx.fillText(genre.length > 12 ? genre.slice(0, 11) + '…' : genre, lx, ly + 3);
+
+    // Label-Position: etwas weiter außen als der Punkt
+    const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
+    const labelDist = p.r + 18 + (p.rankW / maxRankW) * 8;
+    const lx = cx + labelDist * Math.cos(angle);
+    const ly = cy + labelDist * Math.sin(angle);
+
+    // Schriftgröße: Platz 1 = 10px, Platz 15 = 8px
+    const fontSize = 8 + Math.round((p.rankW / maxRankW) * 2);
+    ctx.font = `${fontSize}px Courier New`;
+
+    // Helligkeit: Top-Genres heller
+    const brightness = Math.round(50 + (p.rankW / maxRankW) * 120);
+    ctx.fillStyle = `rgb(${brightness},${brightness},${brightness})`;
+
+    ctx.textAlign = lx > cx + 8 ? 'left' : lx < cx - 8 ? 'right' : 'center';
+    const label = p.genre.length > 14 ? p.genre.slice(0, 13) + '…' : p.genre;
+    ctx.fillText(label, lx, ly + fontSize * 0.35);
+
+    // Rang-Nummer klein daneben
+    ctx.font = '7px Courier New';
+    ctx.fillStyle = `rgba(${brightness},${brightness},${brightness},0.45)`;
+    ctx.fillText(`#${i + 1}`, lx, ly + fontSize * 0.35 + 9);
   });
 
-  // ── TRAITS BESCHREIBEN
-  const diversityLabel = sides <= 4 ? 'Sehr fokussiert' : sides <= 6 ? 'Ausgewogen' : sides <= 9 ? 'Vielfältig' : 'Eklektisch';
-  const intensityLabel = dominance > 0.4 ? 'Ein Genre dominiert' : dominance > 0.25 ? 'Klarer Schwerpunkt' : 'Gleichmäßig verteilt';
+  // ── TRAITS
+  const diversityLabel = sides <= 4 ? 'Sehr fokussiert' : sides <= 7 ? 'Ausgewogen' : sides <= 11 ? 'Vielfältig' : 'Eklektisch';
+  const intensityLabel = dominance > 0.35 ? 'Ein Genre dominiert' : dominance > 0.22 ? 'Klarer Schwerpunkt' : 'Gleichmäßig verteilt';
   const nicheLabel = nicheRatio > 0.7 ? 'Sehr nischig' : nicheRatio > 0.4 ? 'Teils nischig' : 'Mainstreamaffin';
   const consistencyLabel = consistency > 0.6 ? 'Kohärent & treu' : consistency > 0.3 ? 'Variabel' : 'Experimentell';
-  const topGenreNames = top.slice(0, 3).map(([g]) => g).join(', ');
+  const topGenreNames = ranked.slice(0, 3).map(r => r.genre).join(', ');
 
   document.getElementById('shape-traits').innerHTML = [
     ['Ecken', `${sides} — ${diversityLabel}`],
     ['Dominanz', intensityLabel],
     ['Nischigkeit', nicheLabel],
     ['Konsistenz', consistencyLabel],
-    ['Top-Genres', topGenreNames],
+    ['Top 3', topGenreNames],
   ].map(([l, v]) => `
     <div class="shape-trait">
       <span class="trait-label">${l}</span>
       <span class="trait-value">${v}</span>
     </div>`).join('');
 
-  document.getElementById('shape-status').textContent = `${sides}-Eck · ${top.length} Genres analysiert`;
+  document.getElementById('shape-status').textContent = `${sides}-Eck · ${N} Genres · Rang-gewichtet`;
 }
 
 // ═══════════════════════════════════════════════════════════════
