@@ -538,14 +538,48 @@ async function handleCallback(code) {
   }
 }
 
-async function fetchSP(endpoint) {
+async function fetchSP(endpoint, retry = 0) {
   let token = localStorage.getItem('sp_access_token');
-  let resp = await fetch(`${SP_API}${endpoint}`, { headers: { 'Authorization': `Bearer ${token}` } });
+
+  let resp = await fetch(`${SP_API}${endpoint}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  // Token abgelaufen
   if (resp.status === 401) {
     token = await refreshToken();
-    resp = await fetch(`${SP_API}${endpoint}`, { headers: { 'Authorization': `Bearer ${token}` } });
+
+    resp = await fetch(`${SP_API}${endpoint}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
   }
-  if (!resp.ok) throw new Error(`Spotify API Error [${resp.status}]`);
+
+  // Rate Limit erreicht
+  if (resp.status === 429) {
+    const retryAfter = parseInt(resp.headers.get('Retry-After')) || 2;
+
+    console.warn(`Spotify Rate Limit. Warte ${retryAfter}s...`);
+
+    setStatus(`Spotify Rate Limit – warte ${retryAfter}s…`);
+
+    await sleep(retryAfter * 1000);
+
+    // maximal 3 Wiederholungen
+    if (retry < 3) {
+      return fetchSP(endpoint, retry + 1);
+    }
+
+    throw new Error('Spotify API Rate Limit erreicht. Bitte kurz warten.');
+  }
+
+  if (!resp.ok) {
+    throw new Error(`Spotify API Error [${resp.status}]`);
+  }
+
   return resp.json();
 }
 
@@ -590,8 +624,13 @@ async function loadAll() {
     await buildGenres(artistsData.items);
     
     // Hintergrund-Erweiterungen per MusicBrainz
-    buildMBDataForTracks(tracksData.items);
-    buildMBDataForArtists(artistsData.items);
+setTimeout(() => {
+  buildMBDataForTracks(tracksData.items);
+}, 1000);
+
+setTimeout(() => {
+  buildMBDataForArtists(artistsData.items);
+}, 3000);
   } catch (e) {
     showError(e.message);
   } finally {
