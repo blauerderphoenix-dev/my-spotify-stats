@@ -977,6 +977,74 @@ function drawGenreShape(entries) {
 
   const shapeText = shapeTexts[shapeName] || shapeTexts['Pentagon'];
 
+  // ── PERSÖNLICHKEITS-KLASSIFIKATION basierend auf Genre-Profil
+  // Alle Berechnungen nutzen rang-gewichtete Scores
+
+  // Genre-Kategorien: welche Genre-Cluster dominieren
+  const genreStr = ranked.map(r => r.genre.toLowerCase()).join(' ');
+  const hasGenre = (...kws) => kws.some(k => genreStr.includes(k));
+
+  // Energie-Score: electronic/dance/metal/hip hop vs. classical/ambient/folk
+  const energyScore = (
+    (hasGenre('electronic','dance','techno','edm','house','drum','bass','metal','punk','hardcore','hip hop','rap','trap') ? 1 : 0)
+    - (hasGenre('classical','ambient','folk','acoustic','jazz','sleep','meditation','choral') ? 1 : 0)
+  );
+  // Mainstream-Score: pop/charts vs. nische
+  const mainstreamScore = hasGenre('pop','chart','radio','top 40') ? 1 : (nicheRatio > 0.6 ? -1 : 0);
+  // Dunkel-Score: dark, goth, metal, noir, industrial
+  const darkScore = hasGenre('dark','goth','metal','noir','industrial','black','doom','death') ? 1 : 0;
+  // Chill-Score
+  const chillScore = hasGenre('chill','lo-fi','lofi','ambient','relax','study','coffee','bedroom') ? 1 : 0;
+
+  // ── 1. PLAYMOBIL-FIGUR
+  const playmobil = (() => {
+    if (hasGenre('pirat','sea shanty','shanty'))           return { name: 'Piraten-Captain',   desc: 'Laut, chaotisch, auf hoher See. Du machst deine eigenen Regeln und deine Playlist ist ein Schiff das keinen Hafen kennt.' };
+    if (hasGenre('classical','baroque','orchestra','oper')) return { name: 'Ritter auf der Burg', desc: 'Edel, strukturiert, historisch bewusst. Du hörst Musik die Jahrhunderte überdauert hat — und das aus gutem Grund.' };
+    if (hasGenre('hip hop','rap','trap','drill'))           return { name: 'Gangster-Figur',     desc: 'Straight aus dem Playmobil-Ghetto. Goldkette, Sonnenbrille, Boombox. Die anderen Figuren respektieren deinen Vibe.' };
+    if (hasGenre('techno','electronic','rave','club'))      return { name: 'Disco-Roboter',      desc: 'Eigentlich eine Fabrik-Figur, aber jemand hat ihr Neonfarben und einen Synthesizer gegeben. Läuft seit 72h durch.' };
+    if (hasGenre('country','western','bluegrass'))          return { name: 'Cowboy',             desc: 'Pferd, Revolver, Sunset. Du bist der Cowboy der alleine reitet und dabei eine Harmonica spielt.' };
+    if (hasGenre('indie','alternative','emo','shoegaze'))   return { name: 'Hipster-Fotograf',   desc: 'Kamera um den Hals, Vintage-Klamotten, innerlich komplex. Fotografiert verlassene Gebäude und hört Bands die es nicht mehr gibt.' };
+    if (hasGenre('reggae','ska','dancehall','caribbean'))   return { name: 'Strand-Rettungsschwimmer', desc: 'Immer entspannt, immer braun gebrannt. Rettet Leute nicht weil er muss, sondern weil der Strand halt sein Zuhause ist.' };
+    if (hasGenre('metal','death','black','heavy','doom'))   return { name: 'Ritter in schwarzer Rüstung', desc: 'Die böse Fraktion. Alle anderen Playmobil-Figuren meiden ihn. Er sitzt allein in der Burg und das ist genau so geplant.' };
+    if (hasGenre('pop','teen','bubblegum','kpop','k-pop'))  return { name: 'Pop-Star auf Tour',   desc: 'Mikrofon, Glitzer, ausverkaufte Shows. Reist im rosa Tourbus durch Playmobil-City und alle winken.' };
+    if (hasGenre('jazz','blues','soul','swing','bebop'))    return { name: 'Saxophonist im Jazzclub', desc: 'Tritt jeden Abend auf, kennt alle im Raum beim Namen. Sein Cocktail steht immer schon bereit wenn er die Bühne betritt.' };
+    if (darkScore)                                          return { name: 'Geister-Figur',      desc: 'Transparent, gruselig, missverstanden. Eigentlich nett aber niemand fragt nach.' };
+    if (chillScore)                                         return { name: 'Camping-Figur',      desc: 'Zelt, Lagerfeuer, Sternenhimmel. Kein Wifi, kein Problem. Die ruhigste Figur im Set und definitiv die glücklichste.' };
+    return                                                   { name: 'Polizist',               desc: 'Der Klassiker. Solide, zuverlässig, immer da. Dein Musikgeschmack ist wie der Playmobil-Polizist: ikonisch, unerwartet komplex.' };
+  })();
+
+  // ── 2. OCTONAUTEN-CHARAKTER
+  const octonaut = (() => {
+    if (hasGenre('classical','ambient','orchestral','film score','soundtrack')) return { name: 'Käpt'n Barnacles', desc: 'Der ruhige Anführer. Entscheidet mit kühlem Kopf, kennt jeden Ozean. Deine Musik ist so tief wie der Marianengraben.' };
+    if (hasGenre('electronic','synth','futuristic','space','sci-fi'))           return { name: 'Kwazii',           desc: 'Abenteuerlustig, leicht chaotisch, funktioniert irgendwie immer. Springt ins Unbekannte und findet es aufregend statt beängstigend.' };
+    if (hasGenre('folk','acoustic','nature','forest','celtic','world'))         return { name: 'Peso',             desc: 'Der Medic. Fürsorglich, einfühlsam, mag alle. Deine Musik heilt Seelen und das ist kein Zufall.' };
+    if (hasGenre('funk','soul','disco','groove','bass','r&b'))                  return { name: 'Shellington',      desc: 'Der Wissenschaftler. Aufgeregt über alles, erklärt Dinge die niemand gefragt hat aber alle faszinierend finden. Groove ist seine Forschung.' };
+    if (hasGenre('hip hop','rap','trap','grime','urban'))                        return { name: 'Dashi',            desc: 'Fotografiert alles, immer dabei, dokumentiert den Vibe. Technik-affin, schnell, der Fotograf der Crew.' };
+    if (hasGenre('metal','rock','punk','hardcore','grunge'))                    return { name: 'Tunip',            desc: 'Niemand versteht Tunip vollständig und das ist okay. Tunip versteht sich auch selbst kaum. Aber er baut die besten Maschinen.' };
+    if (hasGenre('pop','indie pop','dream pop','synthpop'))                     return { name: 'Professor Inkling', desc: 'Der Intellektuelle im Hintergrund. Plant alles, erklärt nichts bis es nötig ist. Deine Popmelodien haben mehr Tiefe als sie zugeben.' };
+    if (chillScore)                                                              return { name: 'Tweak',            desc: 'Immer beschäftigt, immer entspannt dabei. Repariert das Gup-X während sie Lo-Fi hört. Produktivste Person auf dem Oktopod.' };
+    return                                                                       { name: 'Käpt'n Barnacles',  desc: 'Der zuverlässige Anführer. Du weißt was du willst, du weißt wo es langgeht und du bringst alle sicher ans Ziel.' };
+  })();
+
+  // ── 3. SIGMA / ALPHA / BETA / LICKMA
+  const archetype = (() => {
+    // Sigma: nischig, independent, unvorhersehbar, dark oder experimental
+    if (nicheRatio > 0.65 || (darkScore && sides <= 3) || hasGenre('black metal','noise','drone','experimental','avant','vaporwave','darkwave'))
+      return { name: 'SIGMA', color: '#7c6fff',
+        desc: 'Du hörst Musik die niemand in deinem Umfeld kennt und erklärst sie auch nicht. Kein Playlist-Sharing, kein „hör mal rein". Du bist der Wolf der alleine läuft — nicht weil niemand mitdarf, sondern weil du das Tempo setzt.' };
+    // Alpha: dominant, mainstream-hits, energetisch, selbstsicher
+    if (energyScore >= 1 && mainstreamScore >= 0 && dominance > 0.3)
+      return { name: 'ALPHA', color: '#1DB954',
+        desc: 'Volle Energie, klare Präferenzen, keine Entschuldigungen. Du spielst deine Playlist laut, andere übernehmen sie. Wahrscheinlich derjenige der auf Partys den Aux bekommt — und ihn auch verdient.' };
+    // Beta: breiter Geschmack, sozial, anpassungsfähig, viele Quellen
+    if (consistency < 0.4 || sides >= 6 || (mainstreamScore >= 0 && nicheRatio < 0.4))
+      return { name: 'BETA', color: '#e5a000',
+        desc: 'Du hörst was die Situation verlangt. Road Trip? Du hast die Playlist. Melancholischer Abend? Auch dabei. Du bist das musikalische Chamäleon der Gruppe — unterschätzt, unverzichtbar.' };
+    // Lickma: der Rest. Unklassifizierbar. Chaotisch neutral.
+    return { name: 'LICKMA', color: '#d51007',
+      desc: 'Weder Sigma noch Alpha noch Beta. Du bist Lickma. Dein Musikgeschmack folgt keiner Logik die man benennen könnte. Spotify selbst weiß nicht was es mit dir anfangen soll. Das ist keine Kritik. Das ist ein Kompliment.' };
+  })();
+
   // ── TRAITS
   const diversityLabel = sides <= 2 ? 'Mono-Genre' : sides <= 4 ? 'Fokussiert' : sides <= 6 ? 'Vielfältig' : 'Eklektisch';
   const intensityLabel = dominance > 0.35 ? 'Ein Genre dominiert' : dominance > 0.22 ? 'Klarer Schwerpunkt' : 'Gleichmäßig';
@@ -986,7 +1054,7 @@ function drawGenreShape(entries) {
 
   document.getElementById('shape-traits').innerHTML = [
     ['Form',       shapeName],
-    ['Breite',     `${diversityLabel}`],
+    ['Breite',     diversityLabel],
     ['Dominanz',   intensityLabel],
     ['Nischigkeit',nicheLabel],
     ['Konsistenz', consistencyLbl],
@@ -999,6 +1067,27 @@ function drawGenreShape(entries) {
   + `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
       <div style="font-size:9px;color:var(--dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Was das bedeutet</div>
       <div style="font-size:11px;color:var(--mid);line-height:1.8">${shapeText}</div>
+    </div>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
+      <div style="font-size:9px;color:var(--dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px">Dein Profil</div>
+
+      <div style="margin-bottom:14px">
+        <div style="font-size:9px;letter-spacing:0.12em;color:var(--dim);text-transform:uppercase;margin-bottom:4px">Playmobil-Figur</div>
+        <div style="font-size:12px;color:var(--text);margin-bottom:4px">${playmobil.name}</div>
+        <div style="font-size:11px;color:var(--mid);line-height:1.7">${playmobil.desc}</div>
+      </div>
+
+      <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--line)">
+        <div style="font-size:9px;letter-spacing:0.12em;color:var(--dim);text-transform:uppercase;margin-bottom:4px">Octonaut</div>
+        <div style="font-size:12px;color:var(--text);margin-bottom:4px">${octonaut.name}</div>
+        <div style="font-size:11px;color:var(--mid);line-height:1.7">${octonaut.desc}</div>
+      </div>
+
+      <div style="padding-top:12px;border-top:1px solid var(--line)">
+        <div style="font-size:9px;letter-spacing:0.12em;color:var(--dim);text-transform:uppercase;margin-bottom:4px">Archetypus</div>
+        <div style="font-size:14px;font-weight:bold;color:${archetype.color};margin-bottom:4px;letter-spacing:0.1em">${archetype.name}</div>
+        <div style="font-size:11px;color:var(--mid);line-height:1.7">${archetype.desc}</div>
+      </div>
     </div>`;
 
   document.getElementById('shape-status').textContent = `${shapeName} · HHI ${hhi.toFixed(2)} · ${N} Genres`;
