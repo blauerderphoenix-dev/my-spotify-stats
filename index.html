@@ -1,435 +1,38 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SPOTIFY STATS</title>
-<style>
-  :root {
-    --bg: #f7f5f0;       /* Weiches, wohnliches Creme-Weiß */
-    --bg2: #ffffff;      /* Reinweiß für die gefüllten Kartenflächen */
-    --bg3: #eeebe3;      /* Sanfter Kontrast für inaktive Tabs/Buttons */
-    --line: #e2ded4;     /* Dezente Trennlinien */
-    --dim: #8d877d;      /* Warmes, gedämpftes Graubraun */
-    --mid: #5c5851;      /* Ruhiges Mittelbraun */
-    --text: #2c2a29;     /* Sanftes Anthrazit statt hartem Schwarz */
-    --accent: #b2dec0;   /* Beruhigendes Pastell-Minzgrün */
-    --accent2: #f5b9b2;  /* Weiches Pastell-Rosa */
-    --accent3: #fadca5;  /* Warmes Pastell-Gelb */
-    --accent4: #c2cff4;  /* Softes Pastell-Lavendelblau */
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    font-size: 13px;
-    line-height: 1.6;
-    min-height: 100vh;
-  }
-
-  #app { max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px; }
-
-  /* HEADER */
-  header {
-    padding-bottom: 24px;
-    margin-bottom: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .site-title { 
-    font-size: 18px; 
-    font-weight: 800; 
-    letter-spacing: 0.15em; 
-    color: var(--text); 
-    text-transform: uppercase; 
-    font-family: system-ui, -apple-system, sans-serif;
-    display: inline-block;
-    transform: scaleX(1.4); /* Gestreckte Schriftart-Ästhetik */
-    transform-origin: left;
-  }
-
-  .header-right { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-
-  #user-info { font-size: 12px; color: var(--mid); font-weight: 500; }
-
-  /* BUTTONS */
-  button {
-    background: var(--bg3);
-    border: none;
-    color: var(--mid);
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 8px 18px;
-    border-radius: 20px; /* Abgerundete Ecken */
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, transform 0.1s;
-  }
-  button:hover { background: var(--line); color: var(--text); }
-  button:active { transform: scale(0.97); }
-
-  #login-btn { 
-    background: var(--accent); 
-    color: var(--text); 
-    font-size: 13px; 
-    font-weight: 700;
-    padding: 12px 28px; 
-    letter-spacing: 0.05em;
-    border-radius: 25px;
-    box-shadow: 0 4px 12px rgba(178, 222, 192, 0.4);
-  }
-  #login-btn:hover { background: #a1cfb0; }
-
-  /* LOGIN */
-  #login-screen { display: flex; flex-direction: column; align-items: flex-start; padding-top: 60px; gap: 24px; }
-  .login-label { font-size: 11px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
-
-  input[type="text"] {
-    background: var(--bg2); 
-    border: 1px solid var(--line); 
-    color: var(--text);
-    font-family: inherit; 
-    font-size: 13px; 
-    padding: 10px 16px;
-    border-radius: 12px; /* Abgerundete Ecken */
-    width: 340px; 
-    max-width: 100%; 
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  input[type="text"]:focus { border-color: var(--dim); box-shadow: 0 0 0 3px rgba(141, 135, 125, 0.1); }
-  input[type="text"]::placeholder { color: var(--dim); opacity: 0.7; }
-
-  .redirect-note { font-size: 12px; color: var(--dim); max-width: 460px; line-height: 1.8; }
-  .redirect-note code { color: var(--text); background: var(--bg3); padding: 2px 6px; border-radius: 6px; font-family: monospace; font-size: 11px; }
-
-  /* MAIN */
-  #main-content { display: none; }
-
-  /* TOP TABS */
-  .tab-bar { display: flex; gap: 8px; margin-bottom: 28px; }
-  .tab-bar button {
-    background: var(--bg3);
-    border: none;
-    padding: 10px 22px; 
-    font-size: 12px;
-    border-radius: 12px;
-    color: var(--mid);
-  }
-  .tab-bar button.active { background: var(--text); color: var(--bg2); }
-
-  /* TIME FILTER */
-  .filter-bar { display: flex; gap: 6px; margin-bottom: 24px; width: fit-content; background: var(--bg3); padding: 4px; border-radius: 12px; }
-  .filter-bar button { background: transparent; border: none; padding: 6px 14px; font-size: 11px; border-radius: 8px; color: var(--mid); }
-  .filter-bar button.active { background: var(--bg2); color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-  .filter-bar button.active:hover { background: var(--bg2); color: var(--text); }
-
-  /* SECTION TABS (Songs / Künstler / Genres) */
-  .section-tabs { display: flex; gap: 6px; margin-bottom: 24px; }
-  .section-tab {
-    background: transparent;
-    border: none;
-    padding: 8px 18px; 
-    font-size: 12px;
-    border-radius: 10px; 
-    color: var(--mid);
-  }
-  .section-tab.active { background: var(--accent); color: var(--text); font-weight: 600; }
-  .section-tab:hover { color: var(--text); }
-
-  /* SECTION */
-  .section { margin-bottom: 40px; }
-  .section-header {
-    font-size: 11px; 
-    letter-spacing: 0.15em; 
-    color: var(--dim);
-    text-transform: uppercase; 
-    padding-bottom: 12px;
-    margin-bottom: 12px;
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-    font-weight: 700;
-  }
-  .section-header .mb-note { font-size: 10px; color: var(--dim); font-weight: normal; letter-spacing: 0; text-transform: none; }
-
-  /* TRACK & ARTIST LIST (Gefüllte Flächen) */
-  .track-list, .artist-list, .genre-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-
-  .track-item, .artist-item, .genre-item {
-    background: var(--bg2);
-    border-radius: 14px; /* Weiche Rundungen */
-    padding: 14px 18px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.015);
-    display: grid;
-    align-items: center;
-    gap: 0;
-    border: 1px solid rgba(0,0,0,0.01);
-  }
-
-  .track-item { grid-template-columns: 40px 1fr; }
-  .artist-item { grid-template-columns: 40px 1fr; }
-
-  .rank { color: var(--dim); font-size: 12px; font-weight: bold; text-align: left; padding-right: 12px; }
-
-  .track-main { display: flex; flex-direction: column; gap: 4px; }
-  .track-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .track-name { color: var(--text); font-size: 13px; font-weight: 600; }
-  .track-artist { color: var(--mid); font-size: 12px; }
-
-  .track-meta-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
-  .meta-tag { font-size: 11px; color: var(--dim); }
-  .meta-tag span { color: var(--mid); font-weight: 500; }
-  .meta-tag.loading { color: var(--dim); animation: blink 1.2s step-end infinite; }
-
-  /* ARTIST ITEM */
-  .artist-main { display: flex; flex-direction: column; gap: 4px; }
-  .artist-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .artist-name { color: var(--text); font-size: 13px; font-weight: 600; }
-  .artist-sp-genres { color: var(--mid); font-size: 12px; }
-  .artist-meta-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
-
-  /* GENRE LIST */
-  .genre-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; }
-  .genre-name { flex: 0 0 200px; color: var(--text); font-size: 13px; font-weight: 600; padding-right: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .genre-source { font-size: 11px; padding-right: 12px; flex-shrink: 0; }
-  .genre-source.src-sp  { color: #69b681; font-weight: 600; }
-  .genre-source.src-lfm { color: #db8a81; font-weight: 600; }
-  .genre-source.src-mb  { color: #8794db; font-weight: 600; }
-  .genre-source.src-all { color: #d6ad5e; font-weight: 600; }
-  
-  .genre-bar-wrap { flex: 1; background: var(--bg3); height: 8px; margin-right: 16px; position: relative; border-radius: 4px; overflow: hidden; }
-  .genre-bar { display: block; height: 100%; background: var(--accent); min-width: 2px; border-radius: 4px; }
-  .genre-score { color: var(--dim); font-size: 11px; font-weight: 600; width: 40px; text-align: right; flex-shrink: 0; }
-
-  /* SOURCE LEGEND */
-  .source-legend {
-    display: flex; gap: 18px; margin-bottom: 20px; flex-wrap: wrap; font-size: 11px; font-weight: 500;
-  }
-  .src-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-
-  /* GENRE SHAPE */
-  #genre-shape-section {
-    margin-bottom: 36px; padding: 28px; border: none; background: var(--bg2); border-radius: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.02);
-  }
-  .shape-header {
-    font-size: 11px; letter-spacing: 0.1em; color: var(--dim); text-transform: uppercase; font-weight: 700;
-    margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;
-  }
-  .shape-wrap { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
-  #shape-canvas { flex-shrink: 0; border-radius: 12px; background: #faf9f5; }
-  .shape-legend { flex: 1; min-width: 200px; }
-  .shape-legend-title { font-size: 11px; color: var(--dim); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700; margin-bottom: 14px; }
-  .shape-trait { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--bg3); }
-  .shape-trait:last-child { border-bottom: none; }
-  .trait-label { font-size: 12px; color: var(--mid); }
-  .trait-value { font-size: 12px; color: var(--text); font-weight: 600; text-align: right; max-width: 55%; }
-
-  /* LAST.FM */
-  .lfm-input-row { display: flex; gap: 12px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
-  .lfm-input-row input { width: 240px; }
-
-  /* IMPORT */
-  .import-zone { background: var(--bg2); border: 2px dashed var(--line); border-radius: 16px; padding: 28px 24px; margin-bottom: 20px; max-width: 500px; }
-  .import-zone p { color: var(--mid); font-size: 12px; line-height: 1.8; }
-  .import-zone code { color: var(--text); background: var(--bg3); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-  #file-input { display: none; }
-  .import-stats { font-size: 12px; color: var(--mid); margin-bottom: 24px; line-height: 2; background: var(--bg2); padding: 16px 20px; max-width: 480px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.015); }
-  .import-stats span { color: var(--text); font-weight: 600; }
-
-  /* STATUS / ERROR */
-  #status { font-size: 12px; color: var(--dim); margin-bottom: 16px; min-height: 16px; font-weight: 500; }
-  .loading-text { animation: blink 1s step-end infinite; }
-  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
-  .error-msg { color: #bc3b3b; font-size: 12px; font-weight: 500; border: none; padding: 12px 18px; margin-bottom: 20px; background: #fdebee; border-radius: 12px; }
-
-  .badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border: none; background: var(--bg3); color: var(--mid); border-radius: 6px; vertical-align: middle; margin-left: 6px; }
-  .badge.lfm { background: #fbe6e4; color: #d65b50; }
-  .badge.imp { background: #fef1d8; color: #c48c1d; }
-  .badge.mb  { background: #e9ecfd; color: #536be2; }
-
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
-
-  @media (max-width: 600px) {
-    .genre-name { flex: 0 0 130px; }
-    input[type="text"] { width: 100%; }
-    .site-title { transform: none; font-size: 20px; } /* Deaktiviert Stretch auf Mobilgeräten für besseren Umbruch */
-  }
-</style>
-</head>
-<body>
-<div id="app">
-
-  <header>
-    <span class="site-title">Spotify Stats</span>
-    <div class="header-right">
-      <span id="user-info"></span>
-      <button id="refresh-btn" style="display:none" onclick="onRefresh()">Refresh</button>
-      <button id="logout-btn"  style="display:none" onclick="logout()">Logout</button>
-    </div>
-  </header>
-
-  <div id="login-screen">
-    <button id="login-btn" onclick="startLogin()">Login mit Spotify</button>
-    <div class="redirect-note">
-      Redirect URI im Developer Dashboard eintragen: <code id="redirect-uri-display"></code><br>
-      Angeforderte Scopes: <code>user-top-read user-read-private user-read-recently-played user-library-read</code>
-    </div>
-  </div>
-
-  <div id="main-content">
-    <div id="error-container"></div>
-    <div id="status"></div>
-
-    <div class="tab-bar">
-      <button class="active" onclick="switchTab('spotify', this)">Spotify</button>
-      <button onclick="switchTab('lastfm', this)">Last.fm</button>
-      <button onclick="switchTab('import', this)">Import</button>
-    </div>
-
-    <div id="tab-spotify">
-
-      <div class="filter-bar">
-        <button class="active" onclick="setRange('short_term', this)">~4 Wochen</button>
-        <button onclick="setRange('medium_term', this)">~6 Monate</button>
-        <button onclick="setRange('long_term', this)">Gesamt</button>
-      </div>
-
-      <div class="section-tabs">
-        <button class="section-tab active" onclick="switchSection('tracks', this)">Songs</button>
-        <button class="section-tab" onclick="switchSection('artists', this)">Künstler</button>
-        <button class="section-tab" onclick="switchSection('genres', this)">Genres</button>
-      </div>
-
-      <div id="section-tracks">
-        <div class="section-header">
-          Top Songs
-          <span class="mb-note">MB = MusicBrainz Daten</span>
-        </div>
-        <ul class="track-list" id="tracks-list"></ul>
-      </div>
-
-      <div id="section-artists" style="display:none">
-        <div class="section-header">
-          Top Künstler
-          <span class="mb-note">MB = MusicBrainz Daten</span>
-        </div>
-        <ul class="artist-list" id="artists-list"></ul>
-      </div>
-
-      <div id="section-genres" style="display:none">
-        <div class="section-header">Top Genres <span class="badge lfm">LFM</span> <span class="badge mb">MB</span> + Spotify</div>
-
-        <div id="genre-shape-section">
-          <div class="shape-header">
-            <span>Dein Klang-Profil</span>
-            <span id="shape-status" style="font-size:11px;color:var(--dim)">Wird berechnet…</span>
-          </div>
-          <div class="shape-wrap">
-            <canvas id="shape-canvas" width="340" height="340" style="max-width:100%"></canvas>
-            <div class="shape-legend">
-              <div class="shape-legend-title">Form-Bedeutung</div>
-              <div id="shape-traits"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="source-legend">
-          <span><span class="src-dot" style="background:#69b681"></span>Spotify</span>
-          <span><span class="src-dot" style="background:#db8a81"></span>Last.fm</span>
-          <span><span class="src-dot" style="background:#8794db"></span>MusicBrainz</span>
-          <span><span class="src-dot" style="background:#d6ad5e"></span>Alle 3 Quellen</span>
-        </div>
-
-        <ul class="genre-list" id="genres-list"></ul>
-      </div>
-
-    </div>
-
-    <div id="tab-lastfm" style="display:none">
-      <div class="lfm-input-row">
-        <input id="lfm-username" type="text" placeholder="Last.fm Username" spellcheck="false"/>
-        <button onclick="loadLastfm()">Laden</button>
-      </div>
-      <div class="section">
-        <div class="section-header">Top Tracks <span class="badge lfm">LAST.FM</span></div>
-        <ul class="track-list" id="lfm-tracks-list"></ul>
-      </div>
-      <div class="section">
-        <div class="section-header">Top Artists <span class="badge lfm">LAST.FM</span></div>
-        <ul class="artist-list" id="lfm-artists-list"></ul>
-      </div>
-    </div>
-
-    <div id="tab-import" style="display:none">
-      <div class="import-zone">
-        <p>
-          Spotify Verlaufsdaten importieren:<br><br>
-          1. <code>https://www.spotify.com</code> → Konto → Datenschutz<br>
-          2. „Erweiterte Streaming-Daten anfordern"<br>
-          3. Nach Erhalt die <code>Streaming_History_Audio_*.json</code> hier hochladen.
-        </p>
-      </div>
-      <button onclick="document.getElementById('file-input').click()">JSON-Dateien auswählen</button>
-      <input type="file" id="file-input" accept=".json" multiple onchange="handleImport(this.files)"/>
-      <div id="import-stats" class="import-stats" style="display:none"></div>
-      <div class="section" style="margin-top:24px">
-        <div class="section-header">Top Tracks <span class="badge imp">IMPORT</span></div>
-        <ul class="track-list" id="import-tracks-list"></ul>
-      </div>
-      <div class="section">
-        <div class="section-header">Top Artists <span class="badge imp">IMPORT</span></div>
-        <ul class="artist-list" id="import-artists-list"></ul>
-      </div>
-    </div>
-
-  </div></div><script>
-// ═══════════════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════════════
+<script>
+// ================= CONFIG =================
 const REDIRECT_URI = window.location.origin + window.location.pathname;
-const SCOPES       = 'user-top-read user-read-private user-read-recently-played user-library-read';
-const SP_API       = 'https://api.spotify.com/v1';
-const CLIENT_ID    = '677e7701a9f446cab1c7aa93df3c02f7';
-const LFM_KEY      = '0c6c1bcb14dad55db8b608031ac09521';
-const LFM_API      = 'https://ws.audioscrobbler.com/2.0/';
-const MB_API       = 'https://musicbrainz.org/ws/2';
-const MB_HEADERS   = { 'User-Agent': 'SpotifyStatsPersonal/1.0' };
+const SCOPES = 'user-top-read user-read-private user-read-recently-played user-library-read';
+const SP_API = 'https://api.spotify.com/v1';
+const CLIENT_ID = '677e7701a9f446cab1c7aa93df3c02f7';
 
-let currentRange   = 'short_term';
-let currentTab     = 'spotify';
+const LFM_KEY = '0c6c1bcb14dad55db8b608031ac09521';
+const LFM_API = 'https://ws.audioscrobbler.com/2.0/';
+const MB_API = 'https://musicbrainz.org/ws/2';
+const MB_HEADERS = { 'User-Agent': 'SpotifyStatsPersonal/1.0' };
+
+// ================= STATE =================
+let currentRange = 'short_term';
+let currentTab = 'spotify';
 let currentSection = 'tracks';
-let cachedArtists  = [];
-
 let isLoading = false;
-let spotifyRequestQueue = Promise.resolve();
 
-const mbTrackCache  = {};
+const mbTrackCache = {};
 const mbArtistCache = {};
 
+// ================= INIT =================
 document.getElementById('redirect-uri-display').textContent = REDIRECT_URI;
-const _lfu = localStorage.getItem('lfm_username');
-if (_lfu) document.getElementById('lfm-username').value = _lfu;
 
 (async function init() {
   const params = new URLSearchParams(window.location.search);
+
   if (params.get('code')) {
     await handleCallback(params.get('code'));
     window.history.replaceState({}, document.title, window.location.pathname);
     return;
   }
+
   const token = localStorage.getItem('sp_access_token');
+
   if (token) {
     showApp();
     await loadAll();
@@ -438,69 +41,40 @@ if (_lfu) document.getElementById('lfm-username').value = _lfu;
   }
 })();
 
+// ================= UI =================
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-content').style.display = 'block';
-  document.getElementById('refresh-btn').style.display  = '';
-  document.getElementById('logout-btn').style.display   = '';
+  document.getElementById('refresh-btn').style.display = '';
+  document.getElementById('logout-btn').style.display = '';
 }
+
 function showLogin() {
   document.getElementById('login-screen').style.display = '';
   document.getElementById('main-content').style.display = 'none';
-  document.getElementById('refresh-btn').style.display  = 'none';
-  document.getElementById('logout-btn').style.display   = 'none';
-  document.getElementById('user-info').textContent = '';
 }
 
 function setStatus(msg) {
-  document.getElementById('status').innerHTML = msg ? `<span class="loading-text">${esc(msg)}</span>` : '';
+  document.getElementById('status').innerHTML =
+    msg ? `<span class="loading-text">${esc(msg)}</span>` : '';
 }
+
 function showError(msg) {
-  document.getElementById('error-container').innerHTML = `<div class="error-msg">ERR: ${esc(msg)}</div>`;
-}
-function clearError() { document.getElementById('error-container').innerHTML = ''; }
-
-function metaEl(label, value) {
-  return `<span class="meta-tag">${label}: <span>${esc(String(value))}</span></span>`;
-}
-function fmtDuration(ms) {
-  const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000);
-  return `${m}:${String(s).padStart(2,'0')}`;
-}
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  document.getElementById('error-container').innerHTML =
+    `<div class="error-msg">ERR: ${esc(msg)}</div>`;
 }
 
-function switchTab(tab, btn) {
-  currentTab = tab;
-  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
-  btn.classList.remove('active'); btn.classList.add('active');
-  document.getElementById('tab-spotify').style.display = tab === 'spotify' ? 'block' : 'none';
-  document.getElementById('tab-lastfm').style.display  = tab === 'lastfm' ? 'block' : 'none';
-  document.getElementById('tab-import').style.display  = tab === 'import' ? 'block' : 'none';
+function clearError() {
+  document.getElementById('error-container').innerHTML = '';
 }
 
-function setRange(range, btn) {
-  currentRange = range;
-  document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  loadAll();
-}
-
-function switchSection(sec, btn) {
-  currentSection = sec;
-  document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('section-tracks').style.display  = sec === 'tracks' ? 'block' : 'none';
-  document.getElementById('section-artists').style.display = sec === 'artists' ? 'block' : 'none';
-  document.getElementById('section-genres').style.display  = sec === 'genres' ? 'block' : 'none';
-}
-
+// ================= LOGIN =================
 async function startLogin() {
   const verifier = generateCodeVerifier();
   const challenge = await generateCodeChallenge(verifier);
+
   localStorage.setItem('sp_verifier', verifier);
-  
+
   const url = new URL('https://accounts.spotify.com/authorize');
   url.search = new URLSearchParams({
     response_type: 'code',
@@ -509,14 +83,17 @@ async function startLogin() {
     redirect_uri: REDIRECT_URI,
     code_challenge_method: 'S256',
     code_challenge: challenge
-  }).toString();
+  });
+
   window.location.href = url.toString();
 }
 
 async function handleCallback(code) {
   try {
-    setStatus('Authentifiziere…');
+    setStatus('Login...');
+
     const verifier = localStorage.getItem('sp_verifier');
+
     const resp = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -528,12 +105,15 @@ async function handleCallback(code) {
         code_verifier: verifier
       })
     });
-    if (!resp.ok) throw new Error('Token-Fehler: ' + resp.status);
+
     const data = await resp.json();
+
     localStorage.setItem('sp_access_token', data.access_token);
     localStorage.setItem('sp_refresh_token', data.refresh_token);
+
     showApp();
     await loadAll();
+
   } catch (e) {
     showError(e.message);
   } finally {
@@ -541,601 +121,138 @@ async function handleCallback(code) {
   }
 }
 
-let spotifyRequestQueue = Promise.resolve();
+// ================= SPOTIFY API (FIXED 429) =================
+async function fetchSP(endpoint) {
+  let token = localStorage.getItem('sp_access_token');
 
-async function fetchSP(endpoint, retry = 0) {
-  return spotifyRequestQueue = spotifyRequestQueue.then(async () => {
-
-    let token = localStorage.getItem('sp_access_token');
-
-    const doRequest = async () => {
-      return fetch(`${SP_API}${endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    };
-
-    let resp = await doRequest();
-
-    // Token refresh
-    if (resp.status === 401) {
-      token = await refreshToken();
-      resp = await doRequest();
-    }
-
-    // Spotify Rate Limit
-    if (resp.status === 429) {
-      const retryAfter =
-        parseInt(resp.headers.get('Retry-After')) || 3;
-
-      console.warn(
-        `Spotify Rate Limit (${endpoint}) – ${retryAfter}s warten`
-      );
-
-      setStatus(
-        `Spotify Limit erreicht – ${retryAfter}s warten…`
-      );
-
-      await sleep((retryAfter + 1) * 1000);
-
-      if (retry < 5) {
-        return fetchSP(endpoint, retry + 1);
-      }
-
-      throw new Error(
-        `Spotify Rate Limit dauerhaft erreicht`
-      );
-    }
-
-    if (!resp.ok) {
-      throw new Error(
-        `Spotify API Error [${resp.status}]`
-      );
-    }
-
-    return resp.json();
+  let resp = await fetch(`${SP_API}${endpoint}`, {
+    headers: { Authorization: `Bearer ${token}` }
   });
+
+  if (resp.status === 401) {
+    token = await refreshToken();
+    resp = await fetch(`${SP_API}${endpoint}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+
+  if (resp.status === 429) {
+    const wait = parseInt(resp.headers.get('Retry-After')) || 3;
+
+    setStatus(`Spotify wartet ${wait}s...`);
+    await new Promise(r => setTimeout(r, (wait + 1) * 1000));
+
+    return fetchSP(endpoint);
+  }
+
+  if (!resp.ok) {
+    throw new Error(`Spotify API Error [${resp.status}]`);
+  }
+
+  return resp.json();
 }
 
 async function refreshToken() {
   const rt = localStorage.getItem('sp_refresh_token');
-  if (!rt) { logout(); throw new Error('Session abgelaufen'); }
+
   const resp = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: rt, client_id: CLIENT_ID })
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: rt,
+      client_id: CLIENT_ID
+    })
   });
-  if (!resp.ok) { logout(); throw new Error('Session-Refresh fehlgeschlagen'); }
+
   const data = await resp.json();
   localStorage.setItem('sp_access_token', data.access_token);
-  if (data.refresh_token) localStorage.setItem('sp_refresh_token', data.refresh_token);
+
   return data.access_token;
 }
 
-function logout() {
-  localStorage.clear();
-  showLogin();
-}
-function onRefresh() { loadAll(); }
-
+// ================= LOAD =================
 async function loadAll() {
-  if (isLoading) {
-    console.log('Schon am Laden...');
-    return;
-  }
-
+  if (isLoading) return;
   isLoading = true;
 
-  clearError();
-
   try {
-    setStatus('Lade Profil…');
+    clearError();
 
+    setStatus('Profil...');
     const me = await fetchSP('/me');
 
-    document.getElementById(
-      'user-info'
-    ).textContent =
-      `${me.display_name || me.id} (${me.product})`;
+    document.getElementById('user-info').textContent =
+      `${me.display_name || me.id}`;
 
-    await sleep(500);
+    setStatus('Tracks...');
+    const tracks = await fetchSP(`/me/top/tracks?limit=20&time_range=${currentRange}`);
 
-    setStatus('Lade Top Songs…');
+    setStatus('Artists...');
+    const artists = await fetchSP(`/me/top/artists?limit=20&time_range=${currentRange}`);
 
-    const tracksData = await fetchSP(
-      `/me/top/tracks?limit=20&time_range=${currentRange}`
-    );
-
-    await sleep(700);
-
-    setStatus('Lade Top Künstler…');
-
-    const artistsData = await fetchSP(
-      `/me/top/artists?limit=20&time_range=${currentRange}`
-    );
-
-    cachedArtists = artistsData.items;
-
-    renderTracks(tracksData.items);
-    renderArtists(artistsData.items);
-
-    setStatus('Baue Genres auf…');
-
-    await buildGenres(artistsData.items);
-
-    // Hintergrund-Requests langsamer starten
-    setTimeout(() => {
-      buildMBDataForTracks(
-        tracksData.items.slice(0, 8)
-      );
-    }, 2000);
-
-    setTimeout(() => {
-      buildMBDataForArtists(
-        artistsData.items.slice(0, 8)
-      );
-    }, 5000);
+    renderTracks(tracks.items);
+    renderArtists(artists.items);
 
   } catch (e) {
     showError(e.message);
-  } finally {
-    isLoading = false;
-    setStatus('');
   }
+
+  setStatus('');
+  isLoading = false;
 }
 
-setTimeout(() => {
-  buildMBDataForArtists(artistsData.items);
-}, 3000);
-  } catch (e) {
-    showError(e.message);
-  } finally {
-    setStatus('');
-  }
-}
-
+// ================= RENDER =================
 function renderTracks(items) {
-  const list = document.getElementById('tracks-list');
-  if (!items || !items.length) { list.innerHTML = '<li class="track-item">Keine Daten verfügbar</li>'; return; }
-  list.innerHTML = items.map((t, i) => `
+  const el = document.getElementById('tracks-list');
+
+  el.innerHTML = items.map((t, i) => `
     <li class="track-item">
       <span class="rank">#${i+1}</span>
-      <div class="track-main">
-        <div class="track-title-row">
-          <span class="track-name">${esc(t.name)}</span>
-          <span class="track-artist">${esc(t.artists.map(a=>a.name).join(', '))}</span>
-        </div>
-        <div class="track-meta-row">
-          ${metaEl('Album', t.album.name)}
-          ${t.duration_ms ? metaEl('Dauer', fmtDuration(t.duration_ms)) : ''}
-          ${t.popularity ? metaEl('Popularität', t.popularity + '/100') : ''}
-          <span class="meta-tag loading" id="mb-t-${i}">MB lädt…</span>
-        </div>
+      <div>
+        <div>${esc(t.name)}</div>
+        <div style="color:#666">${esc(t.artists.map(a=>a.name).join(', '))}</div>
       </div>
-    </li>`).join('');
+    </li>
+  `).join('');
 }
 
 function renderArtists(items) {
-  const list = document.getElementById('artists-list');
-  if (!items || !items.length) { list.innerHTML = '<li class="artist-item">Keine Daten verfügbar</li>'; return; }
-  list.innerHTML = items.map((a, i) => `
+  const el = document.getElementById('artists-list');
+
+  el.innerHTML = items.map((a, i) => `
     <li class="artist-item">
       <span class="rank">#${i+1}</span>
-      <div class="artist-main">
-        <div class="artist-title-row">
-          <span class="artist-name">${esc(a.name)}</span>
-          <span class="artist-sp-genres">${esc(a.genres.slice(0,3).join(', ') || 'Keine Genres')}</span>
-        </div>
-        <div class="artist-meta-row">
-          ${metaEl('Follower', a.followers ? a.followers.total.toLocaleString() : '0')}
-          ${metaEl('Popularität', a.popularity ? a.popularity + '/100' : '0')}
-          <span class="meta-tag loading" id="mb-a-${i}">MB lädt…</span>
-        </div>
+      <div>
+        <div>${esc(a.name)}</div>
       </div>
-    </li>`).join('');
+    </li>
+  `).join('');
 }
 
-// GENRE-SYSTEM MIT MEHREREN QUELLEN
-let globalGenreMap = {};
-
-async function buildGenres(spArtists) {
-  globalGenreMap = {};
-  spArtists.forEach((a, index) => {
-    const weight = spArtists.length - index;
-    a.genres.forEach(g => {
-      mergeGenre(globalGenreMap, g, weight, 'sp');
-    });
-  });
-  renderGenres(null, genreEntries(globalGenreMap));
-  
-  // Asynchron Last.fm Genres dazuholen
-  buildGenresLFM(spArtists);
-  // Asynchron MusicBrainz Genres dazuholen
-  buildGenresMB(spArtists);
+// ================= HELPERS =================
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
 }
 
-function mergeGenre(map, name, val, src) {
-  const k = name.toLowerCase().trim();
-  if (!k) return;
-  if (!map[k]) map[k] = { name: name, sp: 0, lfm: 0, mb: 0, score: 0 };
-  map[k][src] += val;
-  map[k].score = map[k].sp * 1.5 + map[k].lfm * 1.0 + map[k].mb * 1.2;
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
 }
 
-function genreEntries(map) {
-  return Object.values(map).sort((a,b) => b.score - a.score).slice(0, 40);
+// ================= BUTTONS =================
+function logout() {
+  localStorage.clear();
+  location.reload();
 }
 
-function renderGenres(elId, entries) {
-  const target = document.getElementById(elId || 'genres-list');
-  if (!entries.length) { target.innerHTML = '<li class="genre-item">Keine Genres berechnet</li>'; return; }
-  
-  const maxScore = Math.max(...entries.map(e => e.score)) || 1;
-  target.innerHTML = entries.map(e => {
-    let srcText = 'Spotify';
-    let srcClass = 'src-sp';
-    if (e.sp && e.lfm && e.mb) { srcText = 'Alle'; srcClass = 'src-all'; }
-    else if (e.sp && e.lfm) { srcText = 'SP+LFM'; srcClass = 'src-all'; }
-    else if (e.sp && e.mb) { srcText = 'SP+MB'; srcClass = 'src-all'; }
-    else if (e.lfm && e.mb) { srcText = 'LFM+MB'; srcClass = 'src-all'; }
-    else if (e.lfm) { srcText = 'Last.fm'; srcClass = 'src-lfm'; }
-    else if (e.mb) { srcText = 'MusicBrainz'; srcClass = 'src-mb'; }
-
-    const pct = Math.min(100, Math.max(4, (e.score / maxScore) * 100));
-    return `
-      <li class="genre-item">
-        <span class="genre-name">${esc(e.name)}</span>
-        <span class="genre-source ${srcClass}">${srcText}</span>
-        <div class="genre-bar-wrap">
-          <span class="genre-bar" style="width:${pct}%"></span>
-        </div>
-        <span class="genre-score">${Math.round(e.score)}</span>
-      </li>`;
-  }).join('');
-
-  if (!elId) {
-    calculateGenreShape(entries);
-  }
+function onRefresh() {
+  loadAll();
 }
 
-async function buildGenresLFM(artists) {
-  for(let i=0; i<Math.min(artists.length, 15); i++) {
-    const a = artists[i];
-    const w = artists.length - i;
-    try {
-      const url = `${LFM_API}?method=artist.gettoptags&artist=${encodeURIComponent(a.name)}&api_key=${LFM_KEY}&format=json`;
-      const r = await fetch(url).then(res => res.json());
-      if (r.toptags && r.toptags.tag) {
-        const tags = Array.isArray(r.toptags.tag) ? r.toptags.tag : [r.toptags.tag];
-        tags.slice(0, 4).forEach(t => {
-          mergeGenre(globalGenreMap, t.name, Math.round(w * 0.8), 'lfm');
-        });
-        renderGenres(null, genreEntries(globalGenreMap));
-      }
-    } catch(e){}
-  }
+function switchTab(tab) {
+  currentTab = tab;
 }
-
-async function buildGenresMB(artists) {
-  for(let i=0; i<Math.min(artists.length, 15); i++) {
-    const a = artists[i];
-    const w = artists.length - i;
-    try {
-      await sleep(250); // Rate Limit Schutz
-      let mb = mbArtistCache[a.name];
-      if (!mb) mb = await mbSearchArtist(a.name);
-      if (!mb) continue;
-      const tags = [...(mb.genres || []), ...(mb.tags || []).filter(t=>t.count>0)];
-      tags.slice(0, 4).forEach(t => {
-        mergeGenre(globalGenreMap, t.name, Math.round(w * 0.9), 'mb');
-      });
-      renderGenres(null, genreEntries(globalGenreMap));
-    } catch(e){}
-  }
-}
-
-// RADAR-SHAPE GENERATOR
-function calculateGenreShape(entries) {
-  const canvas = document.getElementById('shape-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const cx = 170, cy = 170, baseR = 110;
-  
-  ctx.clearRect(0,0,340,340);
-  document.getElementById('shape-status').textContent = 'Berechnet';
-  if (!entries.length) return;
-
-  const totalRankW = entries.reduce((s, r, idx) => s + (entries.length - idx), 0);
-  const hhi = entries.reduce((s, r, idx) => s + Math.pow((entries.length - idx) / totalRankW, 2), 0);
-
-  let sides = 5;
-  if (hhi > 0.45) sides = 3;
-  else if (hhi > 0.28) sides = 4;
-  else if (hhi > 0.18) sides = 5;
-  else if (hhi > 0.10) sides = 6;
-  else sides = 8;
-
-  const N = sides;
-  const pts = [];
-  const topGenres = entries.slice(0, N);
-
-  for (let i = 0; i < N; i++) {
-    const angle = (i * 2 * Math.PI / N) - Math.PI / 2;
-    const rData = topGenres[i];
-    let factor = rData ? (rData.score / entries[0].score) : 0.2;
-    factor = 0.35 + factor * 0.65; 
-    pts.push({ x: cx + baseR * factor * Math.cos(angle), y: cy + baseR * factor * Math.sin(angle), label: rData ? rData.name : '' });
-  }
-
-  // Zeichne konzentrische Kreise im Hintergrund (Pastell Style)
-  ctx.setLineDash([4, 4]);
-  [0.4, 0.7, 1.0].forEach(f => {
-    ctx.beginPath();
-    ctx.arc(cx, cy, baseR * f, 0, 2*Math.PI);
-    ctx.strokeStyle = '#e2ded4';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  });
-  ctx.setLineDash([]);
-
-  // Achsen zeichnen
-  for (let i = 0; i < N; i++) {
-    const angle = (i * 2 * Math.PI / N) - Math.PI / 2;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + baseR * Math.cos(angle), cy + baseR * Math.sin(angle));
-    ctx.strokeStyle = '#eeebe3';
-    ctx.stroke();
-  }
-
-  // Zeichne die ausgefüllte Pastell-Form
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.closePath();
-  ctx.fillStyle = 'rgba(178, 222, 192, 0.5)'; // Pastell-Mint mit Alpha
-  ctx.fill();
-  ctx.strokeStyle = '#99cca8';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // Beschriftungen am Canvas
-  pts.forEach((p, i) => {
-    if (!p.label) return;
-    const angle = (i * 2 * Math.PI / N) - Math.PI / 2;
-    const lx = cx + (baseR + 18) * Math.cos(angle);
-    const ly = cy + (baseR + 14) * Math.sin(angle);
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillStyle = '#5c5851';
-    ctx.textAlign = lx > cx + 10 ? 'left' : lx < cx - 10 ? 'right' : 'center';
-    const shortLabel = p.label.length > 13 ? p.label.slice(0, 11) + '..' : p.label;
-    ctx.fillText(shortLabel, lx, ly + 4);
-  });
-
-  // Profil-Auswertung generieren
-  let shapeName = 'Symmetrisches Pentagon';
-  let shapeText = 'Deine Musik balanciert harmonisch über mehrere Genres hinweg.';
-  if (N === 3) { shapeName = 'Fokus-Triangel'; shapeText = 'Du konzentrierst dich stark auf ein paar Kern-Genres.'; }
-  else if (N === 4) { shapeName = 'Vielseitiges Quartett'; shapeText = 'Dein Sound hat feste Säulen in verschiedenen Richtungen.'; }
-  else if (N >= 6) { shapeName = 'Komplexes Polygon'; shapeText = 'Extrem breiter Musikgeschmack ohne starre Genregrenzen.'; }
-
-  const top3Str = entries.slice(0, 3).map(e=>e.name).join(', ') || 'Keine';
-  
-  document.getElementById('shape-traits').innerHTML = `
-    <div class="shape-trait"><span class="trait-label">Form</span><span class="trait-value">${shapeName}</span></div>
-    <div class="shape-trait"><span class="trait-label">Diversität</span><span class="trait-value">${N} Hauptachsen</span></div>
-    <div class="shape-trait"><span class="trait-label">HHI-Faktor</span><span class="trait-value">${hhi.toFixed(2)}</span></div>
-    <div class="shape-trait"><span class="trait-label">Top 3 Genres</span><span class="trait-value">${esc(top3Str)}</span></div>
-    <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--bg3); font-size:12px; color:var(--mid); line-height:1.6">
-      <strong>Klangbeschreibung:</strong> ${shapeText}
-    </div>
-  `;
-}
-
-// MUSICBRAINZ BACKGROUND PROCESSOR
-async function buildMBDataForTracks(tracks) {
-  for (let i = 0; i < tracks.length; i++) {
-    const t = tracks[i];
-    const el = document.getElementById(`mb-t-${i}`);
-    if (!el) continue;
-    try {
-      await sleep(220);
-      const cacheKey = `${t.name}//${t.artists[0].name}`.toLowerCase();
-      let d = mbTrackCache[cacheKey];
-      if (!d) {
-        const q = `recording:"${t.name}" AND artist:"${t.artists[0].name}"`;
-        const r = await fetch(`${MB_API}/recording?query=${encodeURIComponent(q)}&fmt=json`, { headers: MB_HEADERS }).then(res=>res.json());
-        if (r.recordings && r.recordings.length) {
-          const rec = r.recordings[0];
-          d = { date: rec['first-release-date'] || 'Unbekannt', country: rec['country'] || 'Global' };
-          mbTrackCache[cacheKey] = d;
-        }
-      }
-      if (d) {
-        el.className = 'meta-tag';
-        el.innerHTML = `Release: <span>${esc(d.date.slice(0,4))}</span> | Region: <span>${esc(d.country)}</span>`;
-      } else {
-        el.style.display = 'none';
-      }
-    } catch(e) { el.style.display = 'none'; }
-  }
-}
-
-async function buildMBDataForArtists(artists) {
-  for (let i = 0; i < artists.length; i++) {
-    const a = artists[i];
-    const el = document.getElementById(`mb-a-${i}`);
-    if (!el) continue;
-    try {
-      await sleep(220);
-      let d = mbArtistCache[a.name];
-      if (!d) d = await mbSearchArtist(a.name);
-      if (d && d.type) {
-        el.className = 'meta-tag';
-        el.innerHTML = `Typ: <span>${esc(d.type)}</span> | Herkunft: <span>${esc(d.area)}</span>`;
-      } else {
-        el.style.display = 'none';
-      }
-    } catch(e) { el.style.display = 'none'; }
-  }
-}
-
-async function mbSearchArtist(name) {
-  try {
-    const r = await fetch(`${MB_API}/artist?query=artist:"${encodeURIComponent(name)}"&fmt=json`, { headers: MB_HEADERS }).then(res=>res.json());
-    if (r.artists && r.artists.length) {
-      const art = r.artists[0];
-      const data = {
-        type: art.type || 'Projekt',
-        area: art.area ? art.area.name : 'Unbekannt',
-        genres: (art.genres || []).map(g=>({name: g.name, count: 1})),
-        tags: (art.tags || []).map(t=>({name: t.name, count: t.count || 1}))
-      };
-      mbArtistCache[name] = data;
-      return data;
-    }
-  } catch(e){}
-  return null;
-}
-
-// LAST.FM TAB LOGIC
-async function loadLastfm() {
-  const u = document.getElementById('lfm-username').value.trim();
-  if (!u) return;
-  localStorage.setItem('lfm_username', u);
-  clearError();
-  setStatus('Lade Last.fm Daten…');
-  try {
-    const tUrl = `${LFM_API}?method=user.gettoptracks&user=${u}&api_key=${LFM_KEY}&limit=20&format=json`;
-    const tr = await fetch(tUrl).then(res=>res.json());
-    const tList = document.getElementById('lfm-tracks-list');
-    if (tr.toptracks && tr.toptracks.track) {
-      const arr = Array.isArray(tr.toptracks.track) ? tr.toptracks.track : [tr.toptracks.track];
-      tList.innerHTML = arr.map((t, i) => `
-        <li class="track-item">
-          <span class="rank">#${i+1}</span>
-          <div class="track-main">
-            <div class="track-title-row">
-              <span class="track-name">${esc(t.name)}</span>
-              <span class="track-artist">${esc(t.artist.name)}</span>
-            </div>
-            <div class="track-meta-row">${metaEl('Scrobbel-Zahl', t.playcount)}</div>
-          </div>
-        </li>`).join('');
-    } else { tList.innerHTML = '<li class="track-item">Keine Daten gefunden</li>'; }
-
-    const aUrl = `${LFM_API}?method=user.gettopartists&user=${u}&api_key=${LFM_KEY}&limit=20&format=json`;
-    const ar = await fetch(aUrl).then(res=>res.json());
-    const aList = document.getElementById('lfm-artists-list');
-    if (ar.topartists && ar.topartists.artist) {
-      const arr = Array.isArray(ar.topartists.artist) ? ar.topartists.artist : [ar.topartists.artist];
-      aList.innerHTML = arr.map((a, i) => `
-        <li class="artist-item">
-          <span class="rank">#${i+1}</span>
-          <div class="artist-main">
-            <div class="artist-title-row"><span class="artist-name">${esc(a.name)}</span></div>
-            <div class="artist-meta-row">${metaEl('Scrobbel-Zahl', a.playcount)}</div>
-          </div>
-        </li>`).join('');
-    } else { aList.innerHTML = '<li class="artist-item">Keine Daten gefunden</li>'; }
-  } catch(e) { showError('Last.fm Ladefehler: ' + e.message); }
-  finally { setStatus(''); }
-}
-
-// BACKUP-FILE IMPORT LOGIC
-let importTracks = [];
-let importArtists = [];
-
-function handleImport(files) {
-  if (!files.length) return;
-  setStatus('Lese Backup-Dateien…');
-  let loadedCount = 0;
-  
-  const trackCounts = {};
-  const artistCounts = {};
-
-  for (let i = 0; i < files.length; i++) {
-    const r = new FileReader();
-    r.onload = function(e) {
-      try {
-        const arr = JSON.parse(e.target.result);
-        if (Array.isArray(arr)) {
-          arr.forEach(item => {
-            const ms = item.ms_played || item.msPlayed || 0;
-            if (ms < 10000) return; // Überspringe Skips (<10s)
-            
-            const tName = item.master_metadata_track_name || item.trackName;
-            const aName = item.master_metadata_album_artist_name || item.artistName;
-            
-            if (tName && aName) {
-              const tk = `${tName} // ${aName}`;
-              trackCounts[tk] = (trackCounts[tk] || 0) + 1;
-              artistCounts[aName] = (artistCounts[aName] || 0) + 1;
-            }
-          });
-        }
-      } catch(err){}
-      loadedCount++;
-      if (loadedCount === files.length) {
-        processImportResults(trackCounts, artistCounts);
-      }
-    };
-    r.readAsText(files[i]);
-  }
-}
-
-function processImportResults(tc, ac) {
-  importTracks = Object.entries(tc).map(([k, count]) => {
-    const [name, artist] = k.split(' // ');
-    return { name, artist, count };
-  }).sort((a,b)=>b.count - a.count).slice(0, 30);
-
-  importArtists = Object.entries(ac).map(([name, count]) => {
-    return { name, count };
-  }).sort((a,b)=>b.count - a.count).slice(0, 30);
-
-  const stats = document.getElementById('import-stats');
-  stats.style.display = 'block';
-  stats.innerHTML = `Erfolgreich eingelesen: <span>${importTracks.length} einzigartige Songs</span> & <span>${importArtists.length} Künstler</span> extrahiert.`;
-
-  document.getElementById('import-tracks-list').innerHTML = importTracks.map((t, i) => `
-    <li class="track-item">
-      <span class="rank">#${i+1}</span>
-      <div class="track-main">
-        <div class="track-title-row"><span class="track-name">${esc(t.name)}</span><span class="track-artist">${esc(t.artist)}</span></div>
-        <div class="track-meta-row">${metaEl('Wiedergaben (History)', t.count)}</div>
-      </div>
-    </li>`).join('');
-
-  document.getElementById('import-artists-list').innerHTML = importArtists.map((a, i) => `
-    <li class="artist-item">
-      <span class="rank">#${i+1}</span>
-      <div class="artist-main">
-        <div class="artist-title-row"><span class="artist-name">${esc(a.name)}</span></div>
-        <div class="artist-meta-row">${metaEl('Wiedergaben (History)', a.count)}</div>
-      </div>
-    </li>`).join('');
-    
-  setStatus('');
-}
-
-// CRYPTO HELPERS (PKCE-Auth-Flow)
-function generateCodeVerifier() {
-  const arr = new Uint8Array(44);
-  window.crypto.getRandomValues(arr);
-  return b64u(arr);
-}
-async function generateCodeChallenge(verifier) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(verifier);
-  const digest = await window.crypto.subtle.digest('SHA-256', data);
-  return b64u(new Uint8Array(digest));
-}
-function b64u(buf) {
-  return btoa(String.fromCharCode(...buf)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
-</body>
-</html>
