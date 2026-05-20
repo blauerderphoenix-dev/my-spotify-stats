@@ -3,363 +3,401 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MY SPOTIFY STATS</title>
+<title>SPOTIFY STATS</title>
 <style>
-  /* 5 SPECIFIC THEME PALETTES WITH SEPARATE HEADER BACKGROUNDS */
   :root {
-    --bg: #1c1a27;
-    --bg-header: #0e0d14;
-    --bg-card: #262335;
-    --border: #36324c;
-    --text-main: #f4ebd0;
-    --text-muted: #a59ca8;
-    --accent: #ff6e40;
-    
-    --src-lfm: #ef4444;
-    --src-mb: #8b5cf6;
-    --src-all: #f59e0b;
+    --bg: #f7f5f0;       /* Weiches, wohnliches Creme-Weiß */
+    --bg2: #ffffff;      /* Reinweiß für die gefüllten Kartenflächen */
+    --bg3: #eeebe3;      /* Sanfter Kontrast für inaktive Tabs/Buttons */
+    --line: #e2ded4;     /* Dezente Trennlinien */
+    --dim: #8d877d;      /* Warmes, gedämpftes Graubraun */
+    --mid: #5c5851;      /* Ruhiges Mittelbraun */
+    --text: #2c2a29;     /* Sanftes Anthrazit statt hartem Schwarz */
+    --accent: #b2dec0;   /* Beruhigendes Pastell-Minzgrün */
+    --accent2: #f5b9b2;  /* Weiches Pastell-Rosa */
+    --accent3: #fadca5;  /* Warmes Pastell-Gelb */
+    --accent4: #c2cff4;  /* Softes Pastell-Lavendelblau */
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     background: var(--bg);
-    color: var(--text-main);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
+    color: var(--text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
     min-height: 100vh;
-    transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
   }
 
-  #app { max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
+  #app { max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px; }
 
-  /* GIGANTISCHER, ABGETRENNTER HEADER */
+  /* HEADER */
   header {
-    background: var(--bg-header);
-    border-bottom: 2px solid var(--border);
-    padding: 30px 40px;
-    margin: 0 -24px 40px -24px;
+    padding-bottom: 24px;
+    margin-bottom: 32px;
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
     flex-wrap: wrap;
-    gap: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  }
-
-  .main-title {
-    font-family: 'Federal Escort', 'Arial Black', 'Impact', sans-serif;
-    font-size: 48px;
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    text-align: left;
-    line-height: 1;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-left: auto; /* Zwingt die Elemente an die ganz rechte Seite */
-  }
-
-  #user-info { 
-    font-size: 14px; 
-    color: var(--text-main); 
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em; 
-    background: rgba(255,255,255,0.05);
-    padding: 8px 14px;
-    border: 1px solid var(--border);
-  }
-
-  /* BUTTONS & CONTROLS */
-  button {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 10px 18px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  button:hover { border-color: var(--text-muted); color: var(--text-main); }
-
-  #login-btn { 
-    border-color: var(--accent); 
-    color: var(--accent); 
-    font-size: 14px; 
-    padding: 14px 32px; 
-    background: transparent;
-  }
-  #login-btn:hover { background: var(--accent); color: #000; }
-
-  /* NAVIGATION MAIN BLOCKS - KLANGPROFIL IST JETZT AN POS 2 */
-  .main-nav {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 8px;
-    margin-bottom: 24px;
-  }
-  .main-nav button { padding: 14px; text-align: center; }
-  .main-nav button.active {
-    background: var(--text-main);
-    color: var(--bg);
-    border-color: var(--text-main);
-  }
-
-  /* CONTROL PANELS */
-  .spotify-controls {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .control-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .control-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-weight: 800;
-    min-width: 90px;
-  }
-
-  .sub-tabs, .filter-bar { display: flex; gap: 4px; }
-  .sub-tabs button, .filter-bar button { padding: 6px 14px; font-size: 11px; }
-  .sub-tabs button.active, .filter-bar button.active {
-    background: var(--accent);
-    color: #000;
-    border-color: var(--accent);
-  }
-
-  /* LIST ARCHITECTURE */
-  .track-list, .artist-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  
-  .track-item, .artist-item {
-    display: grid;
-    grid-template-columns: 30px 60px 1fr;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 12px 16px;
-    align-items: center;
     gap: 16px;
   }
-  
-  .rank { font-weight: 800; color: var(--text-muted); font-size: 15px; text-align: center; }
 
-  /* ROTIERENDER SCHALLPLATTEN EFFECT (VINYL) */
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+  .site-title { 
+    font-size: 18px; 
+    font-weight: 800; 
+    letter-spacing: 0.15em; 
+    color: var(--text); 
+    text-transform: uppercase; 
+    font-family: system-ui, -apple-system, sans-serif;
+    display: inline-block;
+    transform: scaleX(1.4); /* Gestreckte Schriftart-Ästhetik */
+    transform-origin: left;
   }
 
-  .vinyl-wrapper {
-    position: relative;
-    width: 52px;
-    height: 52px;
-    background: repeating-radial-gradient(#111, #111 2px, #222 3px, #111 4px);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    border: 1px solid #000;
-    animation: spin 8s linear infinite; /* AKTIVIERTE ROTATION */
+  .header-right { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+  #user-info { font-size: 12px; color: var(--mid); font-weight: 500; }
+
+  /* BUTTONS */
+  button {
+    background: var(--bg3);
+    border: none;
+    color: var(--mid);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border-radius: 20px; /* Abgerundete Ecken */
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
   }
-  .vinyl-wrapper::before {
-    content: '';
-    position: absolute;
-    width: 100%; height: 100%;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.4) 50%, rgba(255,255,255,0.1) 100%);
-    pointer-events: none;
+  button:hover { background: var(--line); color: var(--text); }
+  button:active { transform: scale(0.97); }
+
+  #login-btn { 
+    background: var(--accent); 
+    color: var(--text); 
+    font-size: 13px; 
+    font-weight: 700;
+    padding: 12px 28px; 
+    letter-spacing: 0.05em;
+    border-radius: 25px;
+    box-shadow: 0 4px 12px rgba(178, 222, 192, 0.4);
   }
-  .vinyl-cover {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid rgba(0,0,0,0.6);
+  #login-btn:hover { background: #a1cfb0; }
+
+  /* LOGIN */
+  #login-screen { display: flex; flex-direction: column; align-items: flex-start; padding-top: 60px; gap: 24px; }
+  .login-label { font-size: 11px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+
+  input[type="text"] {
+    background: var(--bg2); 
+    border: 1px solid var(--line); 
+    color: var(--text);
+    font-family: inherit; 
+    font-size: 13px; 
+    padding: 10px 16px;
+    border-radius: 12px; /* Abgerundete Ecken */
+    width: 340px; 
+    max-width: 100%; 
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
+  input[type="text"]:focus { border-color: var(--dim); box-shadow: 0 0 0 3px rgba(141, 135, 125, 0.1); }
+  input[type="text"]::placeholder { color: var(--dim); opacity: 0.7; }
 
-  /* REINES KÜNSTLER-BILD OHNE OVERLAY UND ROTATION */
-  .artist-img {
-    width: 52px;
-    height: 52px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-  }
+  .redirect-note { font-size: 12px; color: var(--dim); max-width: 460px; line-height: 1.8; }
+  .redirect-note code { color: var(--text); background: var(--bg3); padding: 2px 6px; border-radius: 6px; font-family: monospace; font-size: 11px; }
 
-  /* DETAILS */
-  .track-main, .artist-main { display: flex; flex-direction: column; gap: 2px; }
-  .track-title-row, .artist-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .track-name, .artist-name { color: var(--text-main); font-size: 15px; font-weight: 600; }
-  .track-artist, .artist-sp-genres { color: var(--text-muted); font-size: 13px; }
-  
-  .track-meta-row, .artist-meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-  .meta-tag { font-size: 11px; color: var(--text-muted); background: var(--bg); padding: 2px 8px; border: 1px solid var(--border); }
-  .meta-tag span { color: var(--text-main); font-weight: 500; }
-  .meta-tag.loading { color: var(--text-muted); animation: blink 1.2s step-end infinite; }
-
-  /* GENRES & PROFIL STYLES */
-  .genre-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-  .genre-item { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border); padding: 12px 16px; gap: 12px; }
-  .genre-name { flex: 0 0 180px; color: var(--text-main); font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .genre-source { font-size: 10px; font-weight: 700; width: 60px; text-align: center; }
-  .genre-source.src-sp  { color: var(--accent); }
-  .genre-source.src-lfm { color: var(--src-lfm); }
-  .genre-source.src-mb  { color: var(--src-mb); }
-  .genre-source.src-all { color: var(--src-all); }
-  .genre-bar-wrap { flex: 1; background: var(--bg); height: 6px; }
-  .genre-bar { display: block; height: 100%; min-width: 2px; }
-  .genre-score { color: var(--text-muted); font-size: 11px; width: 48px; text-align: right; font-weight: 600; }
-
-  #genre-shape-section { background: var(--bg-card); border: 1px solid var(--border); padding: 32px; }
-  .shape-wrap { display: flex; gap: 48px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
-  .shape-legend { flex: 1; min-width: 320px; }
-  .shape-trait { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .trait-label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
-  .trait-value { font-size: 13px; color: var(--text-main); font-weight: 700; text-align: right; max-width: 220px; }
-
-  .source-legend { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; font-size: 11px; font-weight: 600; }
-  .src-dot { display: inline-block; width: 8px; height: 8px; margin-right: 6px; vertical-align: middle; }
-  input[type="text"] { background: var(--bg); border: 1px solid var(--border); color: var(--text-main); font-family: inherit; padding: 10px 16px; width: 260px; outline: none; }
-  .import-zone { border: 2px dashed var(--border); padding: 32px; margin-bottom: 24px; background: var(--bg-card); text-align:center; }
-  .import-stats { font-size: 13px; color: var(--text-muted); margin-bottom: 32px; background: var(--bg-card); border: 1px solid var(--border); padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
-  .import-stats span { color: var(--text-main); font-weight: 700; display: block; font-size: 18px; margin-top: 4px; }
-  #status { font-size: 12px; color: var(--accent); text-align: center; margin-bottom: 24px; font-weight: 600; min-height: 18px; }
-  #login-screen { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 40px; gap: 24px; }
+  /* MAIN */
   #main-content { display: none; }
-  .content-tab-section { display: none; }
-  .content-tab-section.active { display: block; }
-  .section-header { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+  /* TOP TABS */
+  .tab-bar { display: flex; gap: 8px; margin-bottom: 28px; }
+  .tab-bar button {
+    background: var(--bg3);
+    border: none;
+    padding: 10px 22px; 
+    font-size: 12px;
+    border-radius: 12px;
+    color: var(--mid);
+  }
+  .tab-bar button.active { background: var(--text); color: var(--bg2); }
+
+  /* TIME FILTER */
+  .filter-bar { display: flex; gap: 6px; margin-bottom: 24px; width: fit-content; background: var(--bg3); padding: 4px; border-radius: 12px; }
+  .filter-bar button { background: transparent; border: none; padding: 6px 14px; font-size: 11px; border-radius: 8px; color: var(--mid); }
+  .filter-bar button.active { background: var(--bg2); color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+  .filter-bar button.active:hover { background: var(--bg2); color: var(--text); }
+
+  /* SECTION TABS (Songs / Künstler / Genres) */
+  .section-tabs { display: flex; gap: 6px; margin-bottom: 24px; }
+  .section-tab {
+    background: transparent;
+    border: none;
+    padding: 8px 18px; 
+    font-size: 12px;
+    border-radius: 10px; 
+    color: var(--mid);
+  }
+  .section-tab.active { background: var(--accent); color: var(--text); font-weight: 600; }
+  .section-tab:hover { color: var(--text); }
+
+  /* SECTION */
+  .section { margin-bottom: 40px; }
+  .section-header {
+    font-size: 11px; 
+    letter-spacing: 0.15em; 
+    color: var(--dim);
+    text-transform: uppercase; 
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    font-weight: 700;
+  }
+  .section-header .mb-note { font-size: 10px; color: var(--dim); font-weight: normal; letter-spacing: 0; text-transform: none; }
+
+  /* TRACK & ARTIST LIST (Gefüllte Flächen) */
+  .track-list, .artist-list, .genre-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .track-item, .artist-item, .genre-item {
+    background: var(--bg2);
+    border-radius: 14px; /* Weiche Rundungen */
+    padding: 14px 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.015);
+    display: grid;
+    align-items: center;
+    gap: 0;
+    border: 1px solid rgba(0,0,0,0.01);
+  }
+
+  .track-item { grid-template-columns: 40px 1fr; }
+  .artist-item { grid-template-columns: 40px 1fr; }
+
+  .rank { color: var(--dim); font-size: 12px; font-weight: bold; text-align: left; padding-right: 12px; }
+
+  .track-main { display: flex; flex-direction: column; gap: 4px; }
+  .track-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .track-name { color: var(--text); font-size: 13px; font-weight: 600; }
+  .track-artist { color: var(--mid); font-size: 12px; }
+
+  .track-meta-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
+  .meta-tag { font-size: 11px; color: var(--dim); }
+  .meta-tag span { color: var(--mid); font-weight: 500; }
+  .meta-tag.loading { color: var(--dim); animation: blink 1.2s step-end infinite; }
+
+  /* ARTIST ITEM */
+  .artist-main { display: flex; flex-direction: column; gap: 4px; }
+  .artist-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .artist-name { color: var(--text); font-size: 13px; font-weight: 600; }
+  .artist-sp-genres { color: var(--mid); font-size: 12px; }
+  .artist-meta-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
+
+  /* GENRE LIST */
+  .genre-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; }
+  .genre-name { flex: 0 0 200px; color: var(--text); font-size: 13px; font-weight: 600; padding-right: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .genre-source { font-size: 11px; padding-right: 12px; flex-shrink: 0; }
+  .genre-source.src-sp  { color: #69b681; font-weight: 600; }
+  .genre-source.src-lfm { color: #db8a81; font-weight: 600; }
+  .genre-source.src-mb  { color: #8794db; font-weight: 600; }
+  .genre-source.src-all { color: #d6ad5e; font-weight: 600; }
+  
+  .genre-bar-wrap { flex: 1; background: var(--bg3); height: 8px; margin-right: 16px; position: relative; border-radius: 4px; overflow: hidden; }
+  .genre-bar { display: block; height: 100%; background: var(--accent); min-width: 2px; border-radius: 4px; }
+  .genre-score { color: var(--dim); font-size: 11px; font-weight: 600; width: 40px; text-align: right; flex-shrink: 0; }
+
+  /* SOURCE LEGEND */
+  .source-legend {
+    display: flex; gap: 18px; margin-bottom: 20px; flex-wrap: wrap; font-size: 11px; font-weight: 500;
+  }
+  .src-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+  /* GENRE SHAPE */
+  #genre-shape-section {
+    margin-bottom: 36px; padding: 28px; border: none; background: var(--bg2); border-radius: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.02);
+  }
+  .shape-header {
+    font-size: 11px; letter-spacing: 0.1em; color: var(--dim); text-transform: uppercase; font-weight: 700;
+    margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .shape-wrap { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+  #shape-canvas { flex-shrink: 0; border-radius: 12px; background: #faf9f5; }
+  .shape-legend { flex: 1; min-width: 200px; }
+  .shape-legend-title { font-size: 11px; color: var(--dim); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700; margin-bottom: 14px; }
+  .shape-trait { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--bg3); }
+  .shape-trait:last-child { border-bottom: none; }
+  .trait-label { font-size: 12px; color: var(--mid); }
+  .trait-value { font-size: 12px; color: var(--text); font-weight: 600; text-align: right; max-width: 55%; }
+
+  /* LAST.FM */
+  .lfm-input-row { display: flex; gap: 12px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
+  .lfm-input-row input { width: 240px; }
+
+  /* IMPORT */
+  .import-zone { background: var(--bg2); border: 2px dashed var(--line); border-radius: 16px; padding: 28px 24px; margin-bottom: 20px; max-width: 500px; }
+  .import-zone p { color: var(--mid); font-size: 12px; line-height: 1.8; }
+  .import-zone code { color: var(--text); background: var(--bg3); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+  #file-input { display: none; }
+  .import-stats { font-size: 12px; color: var(--mid); margin-bottom: 24px; line-height: 2; background: var(--bg2); padding: 16px 20px; max-width: 480px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.015); }
+  .import-stats span { color: var(--text); font-weight: 600; }
+
+  /* STATUS / ERROR */
+  #status { font-size: 12px; color: var(--dim); margin-bottom: 16px; min-height: 16px; font-weight: 500; }
+  .loading-text { animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
+  .error-msg { color: #bc3b3b; font-size: 12px; font-weight: 500; border: none; padding: 12px 18px; margin-bottom: 20px; background: #fdebee; border-radius: 12px; }
+
+  .badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border: none; background: var(--bg3); color: var(--mid); border-radius: 6px; vertical-align: middle; margin-left: 6px; }
+  .badge.lfm { background: #fbe6e4; color: #d65b50; }
+  .badge.imp { background: #fef1d8; color: #c48c1d; }
+  .badge.mb  { background: #e9ecfd; color: #536be2; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+  @media (max-width: 600px) {
+    .genre-name { flex: 0 0 130px; }
+    input[type="text"] { width: 100%; }
+    .site-title { transform: none; font-size: 20px; } /* Deaktiviert Stretch auf Mobilgeräten für besseren Umbruch */
+  }
 </style>
 </head>
 <body>
-
-<header>
-  <h1 class="main-title">MY SPOTIFY STATS</h1>
-  <div class="header-right">
-    <div id="user-info"></div>
-    <button id="refresh-btn" style="display:none" onclick="onRefresh()">Aktualisieren</button>
-    <button id="logout-btn"  style="display:none" onclick="logout()">Logout</button>
-  </div>
-</header>
-
 <div id="app">
+
+  <header>
+    <span class="site-title">Spotify Stats</span>
+    <div class="header-right">
+      <span id="user-info"></span>
+      <button id="refresh-btn" style="display:none" onclick="onRefresh()">Refresh</button>
+      <button id="logout-btn"  style="display:none" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
   <div id="login-screen">
-    <button id="login-btn" onclick="startLogin()">Mit Spotify verbinden</button>
-    <div style="font-size:12px; color:var(--text-muted)">Redirect URI: <code id="redirect-uri-display"></code></div>
+    <button id="login-btn" onclick="startLogin()">Login mit Spotify</button>
+    <div class="redirect-note">
+      Redirect URI im Developer Dashboard eintragen: <code id="redirect-uri-display"></code><br>
+      Angeforderte Scopes: <code>user-top-read user-read-private user-read-recently-played user-library-read</code>
+    </div>
   </div>
 
   <div id="main-content">
     <div id="error-container"></div>
     <div id="status"></div>
 
-    <nav class="main-nav">
+    <div class="tab-bar">
       <button class="active" onclick="switchTab('spotify', this)">Spotify</button>
-      <button onclick="switchTab('profile', this)">Klangprofil</button>
       <button onclick="switchTab('lastfm', this)">Last.fm</button>
       <button onclick="switchTab('import', this)">Import</button>
-      <button onclick="switchTab('genres', this)">Genres</button>
-    </nav>
-
-    <div id="global-timeframe" class="spotify-controls">
-      <div class="control-row">
-        <span class="control-label">Zeitraum:</span>
-        <div class="filter-bar">
-          <button class="active time-btn" onclick="setRange('short_term', this)">~4 Wochen</button>
-          <button class="time-btn" onclick="setRange('medium_term', this)">~6 Monate</button>
-          <button class="time-btn" onclick="setRange('long_term', this)">Gesamt</button>
-        </div>
-      </div>
     </div>
 
-    <div id="tab-spotify" class="content-tab-section active">
-      <div class="spotify-controls" style="margin-bottom: 24px;">
-        <div class="control-row">
-          <span class="control-label">Anzeige:</span>
-          <div class="sub-tabs">
-            <button class="active" onclick="switchSection('tracks', this)">Songs</button>
-            <button onclick="switchSection('artists', this)">Künstler</button>
-          </div>
-        </div>
+    <div id="tab-spotify">
+
+      <div class="filter-bar">
+        <button class="active" onclick="setRange('short_term', this)">~4 Wochen</button>
+        <button onclick="setRange('medium_term', this)">~6 Monate</button>
+        <button onclick="setRange('long_term', this)">Gesamt</button>
+      </div>
+
+      <div class="section-tabs">
+        <button class="section-tab active" onclick="switchSection('tracks', this)">Songs</button>
+        <button class="section-tab" onclick="switchSection('artists', this)">Künstler</button>
+        <button class="section-tab" onclick="switchSection('genres', this)">Genres</button>
       </div>
 
       <div id="section-tracks">
-        <div class="section-header">Top Songs</div>
+        <div class="section-header">
+          Top Songs
+          <span class="mb-note">MB = MusicBrainz Daten</span>
+        </div>
         <ul class="track-list" id="tracks-list"></ul>
       </div>
 
       <div id="section-artists" style="display:none">
-        <div class="section-header">Top Künstler</div>
+        <div class="section-header">
+          Top Künstler
+          <span class="mb-note">MB = MusicBrainz Daten</span>
+        </div>
         <ul class="artist-list" id="artists-list"></ul>
       </div>
-    </div>
 
-    <div id="tab-profile" class="content-tab-section">
-      <div id="genre-shape-section">
-        <div class="section-header" style="border:none; margin-bottom:24px;">
-          <span>Dein Geometrisches Klang-Profil</span>
-          <span id="shape-status" style="font-size:11px;color:var(--text-muted)">Berechne Tiefenanalyse…</span>
+      <div id="section-genres" style="display:none">
+        <div class="section-header">Top Genres <span class="badge lfm">LFM</span> <span class="badge mb">MB</span> + Spotify</div>
+
+        <div id="genre-shape-section">
+          <div class="shape-header">
+            <span>Dein Klang-Profil</span>
+            <span id="shape-status" style="font-size:11px;color:var(--dim)">Wird berechnet…</span>
+          </div>
+          <div class="shape-wrap">
+            <canvas id="shape-canvas" width="340" height="340" style="max-width:100%"></canvas>
+            <div class="shape-legend">
+              <div class="shape-legend-title">Form-Bedeutung</div>
+              <div id="shape-traits"></div>
+            </div>
+          </div>
         </div>
-        <div class="shape-wrap">
-          <canvas id="shape-canvas" width="340" height="340"></canvas>
-          <div class="shape-legend"><div id="shape-traits"></div></div>
+
+        <div class="source-legend">
+          <span><span class="src-dot" style="background:#69b681"></span>Spotify</span>
+          <span><span class="src-dot" style="background:#db8a81"></span>Last.fm</span>
+          <span><span class="src-dot" style="background:#8794db"></span>MusicBrainz</span>
+          <span><span class="src-dot" style="background:#d6ad5e"></span>Alle 3 Quellen</span>
         </div>
+
+        <ul class="genre-list" id="genres-list"></ul>
       </div>
+
     </div>
 
-    <div id="tab-lastfm" class="content-tab-section">
-      <div class="spotify-controls" style="flex-direction:row; justify-content: space-between; align-items:center;">
+    <div id="tab-lastfm" style="display:none">
+      <div class="lfm-input-row">
         <input id="lfm-username" type="text" placeholder="Last.fm Username" spellcheck="false"/>
-        <button onclick="loadLastfm()">Daten laden</button>
+        <button onclick="loadLastfm()">Laden</button>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
-        <div><div class="section-header">Top Tracks (Last.fm)</div><ul class="track-list" id="lfm-tracks-list"></ul></div>
-        <div><div class="section-header">Top Artists (Last.fm)</div><ul class="artist-list" id="lfm-artists-list"></ul></div>
+      <div class="section">
+        <div class="section-header">Top Tracks <span class="badge lfm">LAST.FM</span></div>
+        <ul class="track-list" id="lfm-tracks-list"></ul>
+      </div>
+      <div class="section">
+        <div class="section-header">Top Artists <span class="badge lfm">LAST.FM</span></div>
+        <ul class="artist-list" id="lfm-artists-list"></ul>
       </div>
     </div>
 
-    <div id="tab-import" class="content-tab-section">
+    <div id="tab-import" style="display:none">
       <div class="import-zone">
-        <p>Erweiterte Streaming-Verlauf JSON-Dateien (<code>Streaming_History_Audio_*.json</code>) hochladen:</p>
-        <button style="margin-top: 14px;" onclick="document.getElementById('file-input').click()">JSON auswählen</button>
+        <p>
+          Spotify Verlaufsdaten importieren:<br><br>
+          1. <code>https://www.spotify.com</code> → Konto → Datenschutz<br>
+          2. „Erweiterte Streaming-Daten anfordern"<br>
+          3. Nach Erhalt die <code>Streaming_History_Audio_*.json</code> hier hochladen.
+        </p>
       </div>
-      <input type="file" id="file-input" accept=".json" multiple onchange="handleImport(this.files)" style="display:none"/>
+      <button onclick="document.getElementById('file-input').click()">JSON-Dateien auswählen</button>
+      <input type="file" id="file-input" accept=".json" multiple onchange="handleImport(this.files)"/>
       <div id="import-stats" class="import-stats" style="display:none"></div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
-        <div><div class="section-header">Top Tracks</div><ul class="track-list" id="import-tracks-list"></ul></div>
-        <div><div class="section-header">Top Artists</div><ul class="artist-list" id="import-artists-list"></ul></div>
+      <div class="section" style="margin-top:24px">
+        <div class="section-header">Top Tracks <span class="badge imp">IMPORT</span></div>
+        <ul class="track-list" id="import-tracks-list"></ul>
+      </div>
+      <div class="section">
+        <div class="section-header">Top Artists <span class="badge imp">IMPORT</span></div>
+        <ul class="artist-list" id="import-artists-list"></ul>
       </div>
     </div>
 
-    <div id="tab-genres" class="content-tab-section">
-      <div class="source-legend">
-        <span><span class="src-dot" style="background:var(--accent)"></span>Spotify</span>
-        <span><span class="src-dot" style="background:var(--src-lfm)"></span>Last.fm</span>
-        <span><span class="src-dot" style="background:var(--src-mb)"></span>MusicBrainz</span>
-      </div>
-      <ul class="genre-list" id="genres-list"></ul>
-    </div>
-
-  </div>
-</div>
-
-<script>
+  </div></div><script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 const SCOPES       = 'user-top-read user-read-private user-read-recently-played user-library-read';
 const SP_API       = 'https://api.spotify.com/v1';
@@ -373,9 +411,9 @@ let currentRange   = 'short_term';
 let currentTab     = 'spotify';
 let currentSection = 'tracks';
 let cachedArtists  = [];
+
 const mbTrackCache  = {};
 const mbArtistCache = {};
-let globalGenreMap = {};
 
 document.getElementById('redirect-uri-display').textContent = REDIRECT_URI;
 const _lfu = localStorage.getItem('lfm_username');
@@ -383,401 +421,624 @@ if (_lfu) document.getElementById('lfm-username').value = _lfu;
 
 (async function init() {
   const params = new URLSearchParams(window.location.search);
-  if (params.get('code')) { await handleCallback(); return; }
+  if (params.get('code')) {
+    await handleCallback(params.get('code'));
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return;
+  }
   const token = localStorage.getItem('sp_access_token');
-  const expAt = Number(localStorage.getItem('sp_expires_at') || 0);
-  if (token && Date.now() < expAt) { showApp(); await loadAll(); }
-  else if (token && localStorage.getItem('sp_refresh_token')) {
-    if (await refreshToken()) { showApp(); await loadAll(); } else showLogin();
-  } else { showLogin(); }
+  if (token) {
+    showApp();
+    await loadAll();
+  } else {
+    showLogin();
+  }
 })();
 
-function updateThemeColors(p) {
-  const r = document.documentElement;
-  r.style.setProperty('--bg', p.bg); r.style.setProperty('--bg-header', p.header); r.style.setProperty('--bg-card', p.card);
-  r.style.setProperty('--text-main', p.text); r.style.setProperty('--text-muted', p.muted);
-  r.style.setProperty('--accent', p.accent); r.style.setProperty('--border', p.border);
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+  document.getElementById('refresh-btn').style.display  = '';
+  document.getElementById('logout-btn').style.display   = '';
+}
+function showLogin() {
+  document.getElementById('login-screen').style.display = '';
+  document.getElementById('main-content').style.display = 'none';
+  document.getElementById('refresh-btn').style.display  = 'none';
+  document.getElementById('logout-btn').style.display   = 'none';
+  document.getElementById('user-info').textContent = '';
 }
 
-function detectAndApplyTheme(genreString) {
-  const str = genreString.toLowerCase();
-  const palettes = {
-    pop:    { bg: '#1c1a27', header: '#0e0d14', card: '#262335', text: '#f4ebd0', muted: '#a59ca8', accent: '#ff6e40', border: '#36324c' },
-    rock:   { bg: '#060709', header: '#010203', card: '#0f111a', text: '#e6edf3', muted: '#7d8590', accent: '#da3633', border: '#21262d' },
-    indie:  { bg: '#120b24', header: '#070410', card: '#1d143a', text: '#e1d5f5', muted: '#9683b5', accent: '#ff71ce', border: '#2f2256' },
-    jazz:   { bg: '#161412', header: '#0b0a09', card: '#231f1b', text: '#f5eedc', muted: '#8c8275', accent: '#c99e63', border: '#36302b' },
-    chill:  { bg: '#0b0914', header: '#040308', card: '#141226', text: '#e2e1e9', muted: '#797593', accent: '#00f0ff', border: '#221f3b' }
-  };
+function setStatus(msg) {
+  document.getElementById('status').innerHTML = msg ? `<span class="loading-text">${esc(msg)}</span>` : '';
+}
+function showError(msg) {
+  document.getElementById('error-container').innerHTML = `<div class="error-msg">ERR: ${esc(msg)}</div>`;
+}
+function clearError() { document.getElementById('error-container').innerHTML = ''; }
 
-  if (str.includes('rock') || str.includes('metal') || str.includes('punk') || str.includes('goth')) {
-    updateThemeColors(palettes.rock);
-  } else if (str.includes('indie') || str.includes('alternative') || str.includes('folk')) {
-    updateThemeColors(palettes.indie);
-  } else if (str.includes('jazz') || str.includes('classical') || str.includes('blues')) {
-    updateThemeColors(palettes.jazz);
-  } else if (str.includes('chill') || str.includes('ambient') || str.includes('lo-fi')) {
-    updateThemeColors(palettes.chill);
-  } else {
-    updateThemeColors(palettes.pop);
-  }
+function metaEl(label, value) {
+  return `<span class="meta-tag">${label}: <span>${esc(String(value))}</span></span>`;
+}
+function fmtDuration(ms) {
+  const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// OAUTH
-function b64url(buf) { return btoa(String.fromCharCode(...buf)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,''); }
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  btn.classList.remove('active'); btn.classList.add('active');
+  document.getElementById('tab-spotify').style.display = tab === 'spotify' ? 'block' : 'none';
+  document.getElementById('tab-lastfm').style.display  = tab === 'lastfm' ? 'block' : 'none';
+  document.getElementById('tab-import').style.display  = tab === 'import' ? 'block' : 'none';
+}
+
+function setRange(range, btn) {
+  currentRange = range;
+  document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadAll();
+}
+
+function switchSection(sec, btn) {
+  currentSection = sec;
+  document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('section-tracks').style.display  = sec === 'tracks' ? 'block' : 'none';
+  document.getElementById('section-artists').style.display = sec === 'artists' ? 'block' : 'none';
+  document.getElementById('section-genres').style.display  = sec === 'genres' ? 'block' : 'none';
+}
+
 async function startLogin() {
-  const v = b64url(crypto.getRandomValues(new Uint8Array(32)));
-  const h = b64url(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v))));
-  localStorage.setItem('sp_verifier', v);
+  const verifier = generateCodeVerifier();
+  const challenge = await generateCodeChallenge(verifier);
+  localStorage.setItem('sp_verifier', verifier);
+  
   const url = new URL('https://accounts.spotify.com/authorize');
-  url.searchParams.set('client_id', CLIENT_ID); url.searchParams.set('response_type', 'code');
-  url.searchParams.set('redirect_uri', REDIRECT_URI); url.searchParams.set('scope', SCOPES);
-  url.searchParams.set('code_challenge_method', 'S256'); url.searchParams.set('code_challenge', h);
+  url.search = new URLSearchParams({
+    response_type: 'code',
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    redirect_uri: REDIRECT_URI,
+    code_challenge_method: 'S256',
+    code_challenge: challenge
+  }).toString();
   window.location.href = url.toString();
 }
-async function handleCallback() {
-  const code = new URLSearchParams(window.location.search).get('code');
-  history.replaceState({}, '', window.location.pathname);
+
+async function handleCallback(code) {
   try {
+    setStatus('Authentifiziere…');
+    const verifier = localStorage.getItem('sp_verifier');
     const resp = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ client_id: CLIENT_ID, grant_type: 'authorization_code', code, redirect_uri: REDIRECT_URI, code_verifier: localStorage.getItem('sp_verifier') }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: CLIENT_ID,
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: REDIRECT_URI,
+        code_verifier: verifier
+      })
     });
-    saveToken(await resp.json()); showApp(); await loadAll();
-  } catch(e) { showError('Auth Error'); }
-}
-function saveToken(data) {
-  if (data.access_token) localStorage.setItem('sp_access_token', data.access_token);
-  if (data.refresh_token) localStorage.setItem('sp_refresh_token', data.refresh_token);
-  if (data.expires_in) localStorage.setItem('sp_expires_at', Date.now() + (data.expires_in - 60) * 1000);
-}
-async function refreshToken() {
-  const rt = localStorage.getItem('sp_refresh_token'); if (!rt) return false;
-  const resp = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ client_id: CLIENT_ID, grant_type: 'refresh_token', refresh_token: rt }),
-  });
-  if (!resp.ok) return false; saveToken(await resp.json()); return true;
-}
-async function getToken() {
-  if (Date.now() > Number(localStorage.getItem('sp_expires_at') || 0)) await refreshToken();
-  return localStorage.getItem('sp_access_token');
-}
-function logout() { localStorage.clear(); showLogin(); }
-
-async function spFetch(endpoint) {
-  const token = await getToken();
-  const resp = await fetch(SP_API + endpoint, { headers: { Authorization: 'Bearer ' + token } });
-  if (!resp.ok) throw new Error('API Error'); return resp.json();
-}
-async function loadAll() {
-  clearError(); setStatus('Lade Spotify Profil- und Topdaten…');
-  try {
-    const [me, tracks, artists] = await Promise.all([
-      spFetch('/me'), spFetch(`/me/top/tracks?limit=50&time_range=${currentRange}`), spFetch(`/me/top/artists?limit=50&time_range=${currentRange}`)
-    ]);
-    document.getElementById('user-info').textContent = me.display_name || me.id;
-    cachedArtists = artists.items;
-    renderTracks(tracks.items); renderArtists(artists.items);
+    if (!resp.ok) throw new Error('Token-Fehler: ' + resp.status);
+    const data = await resp.json();
+    localStorage.setItem('sp_access_token', data.access_token);
+    localStorage.setItem('sp_refresh_token', data.refresh_token);
+    showApp();
+    await loadAll();
+  } catch (e) {
+    showError(e.message);
+  } finally {
     setStatus('');
-    enrichTracksMB(tracks.items); enrichArtistsMB(artists.items);
-    await buildAllGenres(artists.items);
-  } catch(e) { setStatus(''); showError(e.message); }
-}
-
-async function mbFetch(url) { const r = await fetch(url, { headers: MB_HEADERS }); return r.ok ? r.json() : null; }
-async function mbSearchRecording(title, artist) {
-  const k = `${title}||${artist}`; if (mbTrackCache[k]) return mbTrackCache[k];
-  const d = await mbFetch(`${MB_API}/recording?query=${encodeURIComponent(`recording:"${title}" AND artist:"${artist}"`)}&limit=1&fmt=json`);
-  if (!d?.recordings?.length) return null;
-  return mbTrackCache[k] = await mbFetch(`${MB_API}/recording/${d.recordings[0].id}?inc=releases+genres+ratings&fmt=json`);
-}
-async function mbSearchArtist(name) {
-  if (mbArtistCache[name]) return mbArtistCache[name];
-  const d = await mbFetch(`${MB_API}/artist?query=${encodeURIComponent(`artist:"${name}"`)}&limit=1&fmt=json`);
-  if (!d?.artists?.length) return null;
-  return mbArtistCache[name] = await mbFetch(`${MB_API}/artist/${d.artists[0].id}?inc=genres+tags&fmt=json`);
-}
-async function enrichTracksMB(tracks) {
-  for (let t of tracks) {
-    const el = document.querySelector(`[data-track-id="${t.id}"]`); if (!el) continue;
-    try {
-      await sleep(210); const mb = await mbSearchRecording(t.name, t.artists[0].name); if (!mb) continue;
-      let h = (t.album?.name ? metaEl('Album', t.album.name) : '') + (t.popularity ? metaEl('Popularität', t.popularity + '/100') : '');
-      if (mb.releases?.[0]?.date) h += metaEl('Jahr', mb.releases[0].date.slice(0,4));
-      if (mb.rating?.value) h += metaEl('MB Rating', mb.rating.value.toFixed(1)+'/5');
-      const row = el.querySelector('.track-meta-row'); if (row) row.innerHTML = h;
-    } catch(e){}
-  }
-}
-async function enrichArtistsMB(artists) {
-  for (let a of artists) {
-    const el = document.querySelector(`[data-artist-id="${a.id}"]`); if (!el) continue;
-    try {
-      await sleep(210); const mb = await mbSearchArtist(a.name); if (!mb) continue;
-      let h = metaEl('Follower', a.followers?.total.toLocaleString('de'));
-      if (mb.type) h += metaEl('Typ', mb.type);
-      if (mb.country) h += metaEl('Herkunft', mb.country);
-      const row = el.querySelector('.artist-meta-row'); if (row) row.innerHTML = h;
-    } catch(e){}
   }
 }
 
-function mergeGenre(map, name, score, source) {
-  const n = name.toLowerCase().trim(); if (!n || n.length < 3) return;
-  if (!map[n]) map[n] = { score: 0, sources: new Set() };
-  map[n].score += score; map[n].sources.add(source);
-}
-function genreEntries(map) { return Object.entries(map).sort((a,b)=>b[1].score - a[1].score).slice(0, 50); }
-async function buildAllGenres(artists) {
-  globalGenreMap = {};
-  artists.forEach((a, i) => { (a.genres || []).forEach(g => mergeGenre(globalGenreMap, g, (artists.length - i) * 3, 'spotify')); });
-  renderGenres(genreEntries(globalGenreMap));
-
-  for (let i = 0; i < Math.min(artists.length, 15); i++) {
-    try {
-      const a = artists[i];
-      const r = await fetch(`${LFM_API}?method=artist.gettoptags&artist=${encodeURIComponent(a.name)}&api_key=${LFM_KEY}&format=json`);
-      if (r.ok) {
-        const d = await r.json();
-        (d.toptags?.tag || []).slice(0, 5).forEach(t => mergeGenre(globalGenreMap, t.name, Math.round((artists.length - i) * 1.5), 'lfm'));
-      }
-    } catch(e){}
+async function fetchSP(endpoint) {
+  let token = localStorage.getItem('sp_access_token');
+  let resp = await fetch(`${SP_API}${endpoint}`, { headers: { 'Authorization': `Bearer ${token}` } });
+  if (resp.status === 401) {
+    token = await refreshToken();
+    resp = await fetch(`${SP_API}${endpoint}`, { headers: { 'Authorization': `Bearer ${token}` } });
   }
-  const entries = genreEntries(globalGenreMap);
-  renderGenres(entries);
-  detectAndApplyTheme(entries.map(e => e[0]).join(' '));
-  drawGenreShape(entries);
+  if (!resp.ok) throw new Error(`Spotify API Error [${resp.status}]`);
+  return resp.json();
 }
 
-// MAXIMAL AUSFÜHRLICHES KLANGPROFIL
-function drawGenreShape(entries) {
-  const canvas = document.getElementById('shape-canvas'); if (!canvas) return;
-  const ctx = canvas.getContext('2d'); const W = canvas.width, cx = W / 2, cy = W / 2;
-  ctx.clearRect(0, 0, W, W); if (!entries.length) return;
-
-  const av = entries.slice(0, 10); const N = av.length;
-  const tW = av.reduce((s,_,i)=>s+(N-i), 0);
-  const hhi = av.reduce((s,_,i)=>s+Math.pow((N-i)/tW, 2), 0);
-  let sides = hhi > 0.35 ? 3 : hhi > 0.25 ? 4 : hhi > 0.16 ? 5 : 6;
-
-  const activeAccent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-  const polyPts = (n, r) => Array.from({length: n}, (_, i) => {
-    const a = (2 * Math.PI * i / n) - Math.PI / 2; return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+async function refreshToken() {
+  const rt = localStorage.getItem('sp_refresh_token');
+  if (!rt) { logout(); throw new Error('Session abgelaufen'); }
+  const resp = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: rt, client_id: CLIENT_ID })
   });
-
-  ctx.setLineDash([2, 4]);
-  [0.4, 0.7, 1.0].forEach(f => {
-    const pts = polyPts(sides, 120 * f); ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y)); ctx.closePath();
-    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border'); ctx.stroke();
-  });
-  ctx.setLineDash([]);
-
-  const pts = polyPts(sides, 120);
-  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y)); ctx.closePath();
-  ctx.fillStyle = activeAccent + '18'; ctx.fill(); ctx.strokeStyle = activeAccent; ctx.lineWidth = 2; ctx.stroke();
-
-  pts.forEach((p, i) => {
-    const r = av[i % N]; if (!r) return;
-    ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 2*Math.PI); ctx.fillStyle = activeAccent; ctx.fill();
-    const a = (2 * Math.PI * i / sides) - Math.PI / 2;
-    const lx = cx + 140 * Math.cos(a), ly = cy + 140 * Math.sin(a);
-    ctx.font = 'bold 10px sans-serif'; ctx.fillStyle = 'var(--text-main)'; ctx.textAlign = lx > cx ? 'left' : 'right';
-    ctx.fillText(r[0].toUpperCase(), lx, ly);
-  });
-
-  const txt = av.map(r=>r[0]).join(' ');
-  const playmobil = txt.includes('rock')||txt.includes('metal')||txt.includes('punk') ? {n:'Ritter / Rebell', d:'Laut, kantig, unnachgiebig und energisch strukturiert.'} : txt.includes('indie')||txt.includes('alternative') ? {n:'Entdecker / Abenteurer', d:'Tiefgründig, unkonventionell und melancholisch angehaucht.'} : {n:'Pop-Strategist', d:'Perfekt ausbalanciert, rhythmisch und eingängig.'};
-  const octonaut = txt.includes('jazz')||txt.includes('class')||txt.includes('ambient') ? {n:'Käpt\'n Barnacles', d:'Besonnen, tiefsinnig und hochgradig komplex strukturiert.'} : {n:'Kwazii', d:'Dynamisch, impulsiv und voller unerwarteter akustischer Wendungen.'};
-
-  const names = {3:'Trigonometrisches Triangel', 4:'Symmetrisches Viereck', 5:'Pentagonale Matrix', 6:'Hexagonaler Kristall'};
-  
-  // AUSFÜHRLICHE DATA-TRAITS AUSGABE
-  document.getElementById('shape-traits').innerHTML = [
-    ['Geometrische Struktur', names[sides] || sides+'-Eck Struktur'],
-    ['Musikalische Vielfalt', entries.length + ' distinkte Subgenres identifiziert'],
-    ['Frequenz-Abdeckung', (sides * 15.4).toFixed(1) + '% harmonische Dichte'],
-    ['Klang-Symmetrie', (100 - (hhi*100)).toFixed(1) + '% strukturelle Balance'],
-    ['Playmobil Archetyp', `<strong>${playmobil.n}</strong><br><span style="font-size:11px;color:var(--text-muted)">${playmobil.d}</span>`],
-    ['Octonauten Charakter', `<strong>${octonaut.n}</strong><br><span style="font-size:11px;color:var(--text-muted)">${octonaut.d}</span>`]
-  ].map(([l, v]) => `<div class="shape-trait"><span class="trait-label">${l}</span><span class="trait-value">${v}</span></div>`).join('');
-  
-  document.getElementById('shape-status').textContent = names[sides] || 'Profil berechnet';
+  if (!resp.ok) { logout(); throw new Error('Session-Refresh fehlgeschlagen'); }
+  const data = await resp.json();
+  localStorage.setItem('sp_access_token', data.access_token);
+  if (data.refresh_token) localStorage.setItem('sp_refresh_token', data.refresh_token);
+  return data.access_token;
 }
 
-async function loadLastfm() {
-  const u = document.getElementById('lfm-username').value.trim(); if (!u) return;
-  localStorage.setItem('lfm_username', u); setStatus('Lade Last.fm…');
+function logout() {
+  localStorage.clear();
+  showLogin();
+}
+function onRefresh() { loadAll(); }
+
+async function loadAll() {
+  clearError();
   try {
-    const url = (m) => `${LFM_API}?method=${m}&user=${encodeURIComponent(u)}&api_key=${LFM_KEY}&format=json&limit=50`;
-    const [t, a] = await Promise.all([fetch(url('user.gettoptracks')).then(r=>r.json()), fetch(url('user.gettopartists')).then(r=>r.json())]);
-    renderLfmTracks(t.toptracks?.track); renderLfmArtists(a.topartists?.artist); setStatus('');
-  } catch(e){ setStatus(''); showError('Fehler beim Laden von Last.fm'); }
-}
-
-async function handleImport(files) {
-  if (!files?.length) return; setStatus('Analysiere Import-Daten…');
-  const tCounts = {}, aCounts = {}; let totalPlays = 0;
-  for (let f of files) {
-    try {
-      const entries = JSON.parse(await f.text());
-      for (let e of entries) {
-        if (!e.master_metadata_track_name || (e.ms_played || 0) < 30000) continue;
-        totalPlays++; const k = `${e.master_metadata_track_name}|||${e.master_metadata_album_artist_name}`;
-        tCounts[k] = (tCounts[k]||0)+1; aCounts[e.master_metadata_album_artist_name] = (aCounts[e.master_metadata_album_artist_name]||0)+1;
-      }
-    } catch(e){}
-  }
-  document.getElementById('import-stats').style.display = 'grid';
-  document.getElementById('import-stats').innerHTML = `<div>Streams gesamt<span>${totalPlays}</span></div>`;
-  renderImportTracks(Object.entries(tCounts).sort((a,b)=>b[1]-a[1]).slice(0,50));
-  renderImportArtists(Object.entries(aCounts).sort((a,b)=>b[1]-a[1]).slice(0,50));
-  setStatus('');
-}
-
-// RENDERING PIPELINES WITH ROTATION & PLAYCOUNTS
-function renderTracks(items) {
-  document.getElementById('tracks-list').innerHTML = (items||[]).map((t, i) => {
-    const imgUrl = t.album?.images?.[2]?.url || t.album?.images?.[0]?.url || '';
-    const imgHtml = `<div class="vinyl-wrapper">${imgUrl ? `<img src="${imgUrl}" class="vinyl-cover">` : ''}</div>`;
-    const popHtml = t.popularity ? metaEl('Popularität', t.popularity + '/100') : '';
+    setStatus('Lade Profil…');
+    const me = await fetchSP('/me');
+    document.getElementById('user-info').textContent = `${me.display_name || me.id} (${me.product})`;
     
-    return `
-    <li class="track-item" data-track-id="${t.id}">
-      <span class="rank">${pad(i+1)}</span>
-      ${imgHtml}
+    setStatus('Lade Top Songs…');
+    const tracksData = await fetchSP(`/me/top/tracks?limit=30&time_range=${currentRange}`);
+    renderTracks(tracksData.items);
+    
+    setStatus('Lade Top Künstler…');
+    const artistsData = await fetchSP(`/me/top/artists?limit=30&time_range=${currentRange}`);
+    cachedArtists = artistsData.items;
+    renderArtists(artistsData.items);
+
+    setStatus('Baue Genres auf…');
+    await buildGenres(artistsData.items);
+    
+    // Hintergrund-Erweiterungen per MusicBrainz
+    buildMBDataForTracks(tracksData.items);
+    buildMBDataForArtists(artistsData.items);
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    setStatus('');
+  }
+}
+
+function renderTracks(items) {
+  const list = document.getElementById('tracks-list');
+  if (!items || !items.length) { list.innerHTML = '<li class="track-item">Keine Daten verfügbar</li>'; return; }
+  list.innerHTML = items.map((t, i) => `
+    <li class="track-item">
+      <span class="rank">#${i+1}</span>
       <div class="track-main">
         <div class="track-title-row">
           <span class="track-name">${esc(t.name)}</span>
           <span class="track-artist">${esc(t.artists.map(a=>a.name).join(', '))}</span>
         </div>
         <div class="track-meta-row">
-          ${t.album?.name ? metaEl('Album', t.album.name) : ''}
-          ${popHtml}
+          ${metaEl('Album', t.album.name)}
+          ${t.duration_ms ? metaEl('Dauer', fmtDuration(t.duration_ms)) : ''}
+          ${t.popularity ? metaEl('Popularität', t.popularity + '/100') : ''}
+          <span class="meta-tag loading" id="mb-t-${i}">MB lädt…</span>
         </div>
       </div>
-    </li>`;
-  }).join('') || emptyRow();
+    </li>`).join('');
 }
 
 function renderArtists(items) {
-  document.getElementById('artists-list').innerHTML = (items||[]).map((a, i) => {
-    const imgUrl = a.images?.[2]?.url || a.images?.[0]?.url || '';
-    const imgHtml = imgUrl ? `<img src="${imgUrl}" class="artist-img">` : `<div class="artist-img" style="background:#333"></div>`;
-    
-    return `
-    <li class="artist-item" data-artist-id="${a.id}">
-      <span class="rank">${pad(i+1)}</span>
-      ${imgHtml}
-      <div class="artist-main">
-        <div class="artist-title-row">
-          <span class="artist-name">${esc(a.name)}</span>
-          <span class="artist-sp-genres">${esc((a.genres||[]).slice(0,2).join(', '))}</span>
-        </div>
-        <div class="artist-meta-row">
-          <span class="meta-tag loading">MB lädt…</span>
-        </div>
-      </div>
-    </li>`;
-  }).join('') || emptyRow();
-}
-
-// LAST.FM: EXACT PLAYCOUNT (SCROBBLES) DISPLAY RESTORED
-function renderLfmTracks(items) {
-  document.getElementById('lfm-tracks-list').innerHTML = (items||[]).map((t,i) => {
-    const scrobbles = t.playcount ? Number(t.playcount).toLocaleString('de') : '0';
-    return `
-    <li class="track-item">
-      <span class="rank">${pad(i+1)}</span>
-      <div class="vinyl-wrapper"></div>
-      <div class="track-main">
-        <div class="track-title-row">
-          <span class="track-name">${esc(t.name)}</span>
-          <span class="track-artist">${esc(t.artist?.name)}</span>
-        </div>
-        <div class="track-meta-row">
-          ${metaEl('Scrobbles', scrobbles)}
-        </div>
-      </div>
-    </li>`;
-  }).join('') || emptyRow();
-}
-
-function renderLfmArtists(items) {
-  document.getElementById('lfm-artists-list').innerHTML = (items||[]).map((a,i) => {
-    const scrobbles = a.playcount ? Number(a.playcount).toLocaleString('de') : '0';
-    return `
+  const list = document.getElementById('artists-list');
+  if (!items || !items.length) { list.innerHTML = '<li class="artist-item">Keine Daten verfügbar</li>'; return; }
+  list.innerHTML = items.map((a, i) => `
     <li class="artist-item">
-      <span class="rank">${pad(i+1)}</span>
-      <div class="artist-img" style="background:#222"></div>
+      <span class="rank">#${i+1}</span>
       <div class="artist-main">
         <div class="artist-title-row">
           <span class="artist-name">${esc(a.name)}</span>
+          <span class="artist-sp-genres">${esc(a.genres.slice(0,3).join(', ') || 'Keine Genres')}</span>
         </div>
         <div class="artist-meta-row">
-          ${metaEl('Scrobbles', scrobbles)}
+          ${metaEl('Follower', a.followers ? a.followers.total.toLocaleString() : '0')}
+          ${metaEl('Popularität', a.popularity ? a.popularity + '/100' : '0')}
+          <span class="meta-tag loading" id="mb-a-${i}">MB lädt…</span>
         </div>
       </div>
-    </li>`;
-  }).join('') || emptyRow();
+    </li>`).join('');
 }
 
-function renderImportTracks(items) {
-  document.getElementById('import-tracks-list').innerHTML = (items||[]).map(([k,c],i) => { 
-    const [n,a] = k.split('|||'); 
-    return `<li class="track-item"><span class="rank">${pad(i+1)}</span><div class="vinyl-wrapper"></div><div class="track-main"><div class="track-title-row"><span class="track-name">${esc(n)}</span><span class="track-artist">${esc(a)}</span></div><div class="track-meta-row">${metaEl('Wiedergaben', c)}</div></div></li>`; 
-  }).join('') || emptyRow();
-}
-function renderImportArtists(items) {
-  document.getElementById('import-artists-list').innerHTML = (items||[]).map(([n,c],i) => `<li class="artist-item"><span class="rank">${pad(i+1)}</span><div class="artist-img" style="background:#222"></div><div class="artist-main"><div class="artist-title-row"><span class="artist-name">${esc(n)}</span></div><div class="artist-meta-row">${metaEl('Wiedergaben', c)}</div></div></li>`).join('') || emptyRow();
-}
+// GENRE-SYSTEM MIT MEHREREN QUELLEN
+let globalGenreMap = {};
 
-function renderGenres(entries) {
-  if (!entries.length) return; const max = entries[0][1].score;
-  document.getElementById('genres-list').innerHTML = entries.map(([g, v], i) => {
-    const cls = v.sources.has('spotify') && v.sources.has('lfm') ? 'src-all' : v.sources.has('lfm') ? 'src-lfm' : 'src-sp';
-    return `<li class="genre-item">
-      <span class="rank">${pad(i+1)}</span><span class="genre-name">${esc(g)}</span><span class="genre-source ${cls}">${cls.toUpperCase()}</span>
-      <div class="genre-bar-wrap"><span class="genre-bar" style="width:${Math.round((v.score/max)*100)}%; background:var(--${cls==='src-sp'?'accent':cls})"></span></div>
-      <span class="genre-score">${v.score}</span>
-    </li>`;
-  }).join('');
-}
-
-// ROUTERS
-function switchTab(tab, btn) {
-  currentTab = tab;
-  document.querySelectorAll('.main-nav button').forEach(b => b.classList.remove('active')); btn.classList.add('active');
-  document.querySelectorAll('.content-tab-section').forEach(s => s.classList.remove('active'));
-  document.getElementById(`tab-${tab}`).classList.add('active');
+async function buildGenres(spArtists) {
+  globalGenreMap = {};
+  spArtists.forEach((a, index) => {
+    const weight = spArtists.length - index;
+    a.genres.forEach(g => {
+      mergeGenre(globalGenreMap, g, weight, 'sp');
+    });
+  });
+  renderGenres(null, genreEntries(globalGenreMap));
   
-  const globalFilter = document.getElementById('global-timeframe');
-  if (tab === 'spotify' || tab === 'profile') {
-    globalFilter.style.display = 'block';
-  } else {
-    globalFilter.style.display = 'none';
+  // Asynchron Last.fm Genres dazuholen
+  buildGenresLFM(spArtists);
+  // Asynchron MusicBrainz Genres dazuholen
+  buildGenresMB(spArtists);
+}
+
+function mergeGenre(map, name, val, src) {
+  const k = name.toLowerCase().trim();
+  if (!k) return;
+  if (!map[k]) map[k] = { name: name, sp: 0, lfm: 0, mb: 0, score: 0 };
+  map[k][src] += val;
+  map[k].score = map[k].sp * 1.5 + map[k].lfm * 1.0 + map[k].mb * 1.2;
+}
+
+function genreEntries(map) {
+  return Object.values(map).sort((a,b) => b.score - a.score).slice(0, 40);
+}
+
+function renderGenres(elId, entries) {
+  const target = document.getElementById(elId || 'genres-list');
+  if (!entries.length) { target.innerHTML = '<li class="genre-item">Keine Genres berechnet</li>'; return; }
+  
+  const maxScore = Math.max(...entries.map(e => e.score)) || 1;
+  target.innerHTML = entries.map(e => {
+    let srcText = 'Spotify';
+    let srcClass = 'src-sp';
+    if (e.sp && e.lfm && e.mb) { srcText = 'Alle'; srcClass = 'src-all'; }
+    else if (e.sp && e.lfm) { srcText = 'SP+LFM'; srcClass = 'src-all'; }
+    else if (e.sp && e.mb) { srcText = 'SP+MB'; srcClass = 'src-all'; }
+    else if (e.lfm && e.mb) { srcText = 'LFM+MB'; srcClass = 'src-all'; }
+    else if (e.lfm) { srcText = 'Last.fm'; srcClass = 'src-lfm'; }
+    else if (e.mb) { srcText = 'MusicBrainz'; srcClass = 'src-mb'; }
+
+    const pct = Math.min(100, Math.max(4, (e.score / maxScore) * 100));
+    return `
+      <li class="genre-item">
+        <span class="genre-name">${esc(e.name)}</span>
+        <span class="genre-source ${srcClass}">${srcText}</span>
+        <div class="genre-bar-wrap">
+          <span class="genre-bar" style="width:${pct}%"></span>
+        </div>
+        <span class="genre-score">${Math.round(e.score)}</span>
+      </li>`;
+  }).join('');
+
+  if (!elId) {
+    calculateGenreShape(entries);
   }
 }
-function switchSection(sec, btn) {
-  currentSection = sec;
-  document.querySelectorAll('.sub-tabs button').forEach(b => b.classList.remove('active')); btn.classList.add('active');
-  document.getElementById('section-tracks').style.display = sec === 'tracks' ? 'block' : 'none';
-  document.getElementById('section-artists').style.display = sec === 'artists' ? 'block' : 'none';
+
+async function buildGenresLFM(artists) {
+  for(let i=0; i<Math.min(artists.length, 15); i++) {
+    const a = artists[i];
+    const w = artists.length - i;
+    try {
+      const url = `${LFM_API}?method=artist.gettoptags&artist=${encodeURIComponent(a.name)}&api_key=${LFM_KEY}&format=json`;
+      const r = await fetch(url).then(res => res.json());
+      if (r.toptags && r.toptags.tag) {
+        const tags = Array.isArray(r.toptags.tag) ? r.toptags.tag : [r.toptags.tag];
+        tags.slice(0, 4).forEach(t => {
+          mergeGenre(globalGenreMap, t.name, Math.round(w * 0.8), 'lfm');
+        });
+        renderGenres(null, genreEntries(globalGenreMap));
+      }
+    } catch(e){}
+  }
 }
-function setRange(range, btn) {
-  currentRange = range;
-  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
-  loadAll();
+
+async function buildGenresMB(artists) {
+  for(let i=0; i<Math.min(artists.length, 15); i++) {
+    const a = artists[i];
+    const w = artists.length - i;
+    try {
+      await sleep(250); // Rate Limit Schutz
+      let mb = mbArtistCache[a.name];
+      if (!mb) mb = await mbSearchArtist(a.name);
+      if (!mb) continue;
+      const tags = [...(mb.genres || []), ...(mb.tags || []).filter(t=>t.count>0)];
+      tags.slice(0, 4).forEach(t => {
+        mergeGenre(globalGenreMap, t.name, Math.round(w * 0.9), 'mb');
+      });
+      renderGenres(null, genreEntries(globalGenreMap));
+    } catch(e){}
+  }
 }
-function onRefresh() { loadAll(); }
-function showApp() { document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-content').style.display = 'block'; document.getElementById('refresh-btn').style.display = 'inline-block'; document.getElementById('logout-btn').style.display = 'inline-block'; switchTab('spotify', document.querySelector('.main-nav button')); }
-function showLogin() { document.getElementById('login-screen').style.display = 'flex'; document.getElementById('main-content').style.display = 'none'; document.getElementById('refresh-btn').style.display = 'none'; document.getElementById('logout-btn').style.display = 'none'; }
-function setStatus(m) { document.getElementById('status').innerHTML = m ? `<span style="animation: blink 1s step-end infinite;">${esc(m)}</span>` : ''; }
-function showError(m) { document.getElementById('error-container').innerHTML = `<div style="color:#ff4444; padding:12px; background:#221111; margin-bottom:16px;">${esc(m)}</div>`; }
-function clearError() { document.getElementById('error-container').innerHTML = ''; }
-function metaEl(l, v) { return `<span class="meta-tag">${l}: <span>${esc(String(v))}</span></span>`; }
-function esc(s) { return String(s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>'); }
-function pad(n) { return String(n).padStart(2,'0'); }
-function emptyRow() { return '<li style="color:var(--text-muted); padding:16px; text-align:center;">Keine Daten.</li>'; }
+
+// RADAR-SHAPE GENERATOR
+function calculateGenreShape(entries) {
+  const canvas = document.getElementById('shape-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 170, cy = 170, baseR = 110;
+  
+  ctx.clearRect(0,0,340,340);
+  document.getElementById('shape-status').textContent = 'Berechnet';
+  if (!entries.length) return;
+
+  const totalRankW = entries.reduce((s, r, idx) => s + (entries.length - idx), 0);
+  const hhi = entries.reduce((s, r, idx) => s + Math.pow((entries.length - idx) / totalRankW, 2), 0);
+
+  let sides = 5;
+  if (hhi > 0.45) sides = 3;
+  else if (hhi > 0.28) sides = 4;
+  else if (hhi > 0.18) sides = 5;
+  else if (hhi > 0.10) sides = 6;
+  else sides = 8;
+
+  const N = sides;
+  const pts = [];
+  const topGenres = entries.slice(0, N);
+
+  for (let i = 0; i < N; i++) {
+    const angle = (i * 2 * Math.PI / N) - Math.PI / 2;
+    const rData = topGenres[i];
+    let factor = rData ? (rData.score / entries[0].score) : 0.2;
+    factor = 0.35 + factor * 0.65; 
+    pts.push({ x: cx + baseR * factor * Math.cos(angle), y: cy + baseR * factor * Math.sin(angle), label: rData ? rData.name : '' });
+  }
+
+  // Zeichne konzentrische Kreise im Hintergrund (Pastell Style)
+  ctx.setLineDash([4, 4]);
+  [0.4, 0.7, 1.0].forEach(f => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, baseR * f, 0, 2*Math.PI);
+    ctx.strokeStyle = '#e2ded4';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // Achsen zeichnen
+  for (let i = 0; i < N; i++) {
+    const angle = (i * 2 * Math.PI / N) - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + baseR * Math.cos(angle), cy + baseR * Math.sin(angle));
+    ctx.strokeStyle = '#eeebe3';
+    ctx.stroke();
+  }
+
+  // Zeichne die ausgefüllte Pastell-Form
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(178, 222, 192, 0.5)'; // Pastell-Mint mit Alpha
+  ctx.fill();
+  ctx.strokeStyle = '#99cca8';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Beschriftungen am Canvas
+  pts.forEach((p, i) => {
+    if (!p.label) return;
+    const angle = (i * 2 * Math.PI / N) - Math.PI / 2;
+    const lx = cx + (baseR + 18) * Math.cos(angle);
+    const ly = cy + (baseR + 14) * Math.sin(angle);
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillStyle = '#5c5851';
+    ctx.textAlign = lx > cx + 10 ? 'left' : lx < cx - 10 ? 'right' : 'center';
+    const shortLabel = p.label.length > 13 ? p.label.slice(0, 11) + '..' : p.label;
+    ctx.fillText(shortLabel, lx, ly + 4);
+  });
+
+  // Profil-Auswertung generieren
+  let shapeName = 'Symmetrisches Pentagon';
+  let shapeText = 'Deine Musik balanciert harmonisch über mehrere Genres hinweg.';
+  if (N === 3) { shapeName = 'Fokus-Triangel'; shapeText = 'Du konzentrierst dich stark auf ein paar Kern-Genres.'; }
+  else if (N === 4) { shapeName = 'Vielseitiges Quartett'; shapeText = 'Dein Sound hat feste Säulen in verschiedenen Richtungen.'; }
+  else if (N >= 6) { shapeName = 'Komplexes Polygon'; shapeText = 'Extrem breiter Musikgeschmack ohne starre Genregrenzen.'; }
+
+  const top3Str = entries.slice(0, 3).map(e=>e.name).join(', ') || 'Keine';
+  
+  document.getElementById('shape-traits').innerHTML = `
+    <div class="shape-trait"><span class="trait-label">Form</span><span class="trait-value">${shapeName}</span></div>
+    <div class="shape-trait"><span class="trait-label">Diversität</span><span class="trait-value">${N} Hauptachsen</span></div>
+    <div class="shape-trait"><span class="trait-label">HHI-Faktor</span><span class="trait-value">${hhi.toFixed(2)}</span></div>
+    <div class="shape-trait"><span class="trait-label">Top 3 Genres</span><span class="trait-value">${esc(top3Str)}</span></div>
+    <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--bg3); font-size:12px; color:var(--mid); line-height:1.6">
+      <strong>Klangbeschreibung:</strong> ${shapeText}
+    </div>
+  `;
+}
+
+// MUSICBRAINZ BACKGROUND PROCESSOR
+async function buildMBDataForTracks(tracks) {
+  for (let i = 0; i < tracks.length; i++) {
+    const t = tracks[i];
+    const el = document.getElementById(`mb-t-${i}`);
+    if (!el) continue;
+    try {
+      await sleep(220);
+      const cacheKey = `${t.name}//${t.artists[0].name}`.toLowerCase();
+      let d = mbTrackCache[cacheKey];
+      if (!d) {
+        const q = `recording:"${t.name}" AND artist:"${t.artists[0].name}"`;
+        const r = await fetch(`${MB_API}/recording?query=${encodeURIComponent(q)}&fmt=json`, { headers: MB_HEADERS }).then(res=>res.json());
+        if (r.recordings && r.recordings.length) {
+          const rec = r.recordings[0];
+          d = { date: rec['first-release-date'] || 'Unbekannt', country: rec['country'] || 'Global' };
+          mbTrackCache[cacheKey] = d;
+        }
+      }
+      if (d) {
+        el.className = 'meta-tag';
+        el.innerHTML = `Release: <span>${esc(d.date.slice(0,4))}</span> | Region: <span>${esc(d.country)}</span>`;
+      } else {
+        el.style.display = 'none';
+      }
+    } catch(e) { el.style.display = 'none'; }
+  }
+}
+
+async function buildMBDataForArtists(artists) {
+  for (let i = 0; i < artists.length; i++) {
+    const a = artists[i];
+    const el = document.getElementById(`mb-a-${i}`);
+    if (!el) continue;
+    try {
+      await sleep(220);
+      let d = mbArtistCache[a.name];
+      if (!d) d = await mbSearchArtist(a.name);
+      if (d && d.type) {
+        el.className = 'meta-tag';
+        el.innerHTML = `Typ: <span>${esc(d.type)}</span> | Herkunft: <span>${esc(d.area)}</span>`;
+      } else {
+        el.style.display = 'none';
+      }
+    } catch(e) { el.style.display = 'none'; }
+  }
+}
+
+async function mbSearchArtist(name) {
+  try {
+    const r = await fetch(`${MB_API}/artist?query=artist:"${encodeURIComponent(name)}"&fmt=json`, { headers: MB_HEADERS }).then(res=>res.json());
+    if (r.artists && r.artists.length) {
+      const art = r.artists[0];
+      const data = {
+        type: art.type || 'Projekt',
+        area: art.area ? art.area.name : 'Unbekannt',
+        genres: (art.genres || []).map(g=>({name: g.name, count: 1})),
+        tags: (art.tags || []).map(t=>({name: t.name, count: t.count || 1}))
+      };
+      mbArtistCache[name] = data;
+      return data;
+    }
+  } catch(e){}
+  return null;
+}
+
+// LAST.FM TAB LOGIC
+async function loadLastfm() {
+  const u = document.getElementById('lfm-username').value.trim();
+  if (!u) return;
+  localStorage.setItem('lfm_username', u);
+  clearError();
+  setStatus('Lade Last.fm Daten…');
+  try {
+    const tUrl = `${LFM_API}?method=user.gettoptracks&user=${u}&api_key=${LFM_KEY}&limit=20&format=json`;
+    const tr = await fetch(tUrl).then(res=>res.json());
+    const tList = document.getElementById('lfm-tracks-list');
+    if (tr.toptracks && tr.toptracks.track) {
+      const arr = Array.isArray(tr.toptracks.track) ? tr.toptracks.track : [tr.toptracks.track];
+      tList.innerHTML = arr.map((t, i) => `
+        <li class="track-item">
+          <span class="rank">#${i+1}</span>
+          <div class="track-main">
+            <div class="track-title-row">
+              <span class="track-name">${esc(t.name)}</span>
+              <span class="track-artist">${esc(t.artist.name)}</span>
+            </div>
+            <div class="track-meta-row">${metaEl('Scrobbel-Zahl', t.playcount)}</div>
+          </div>
+        </li>`).join('');
+    } else { tList.innerHTML = '<li class="track-item">Keine Daten gefunden</li>'; }
+
+    const aUrl = `${LFM_API}?method=user.gettopartists&user=${u}&api_key=${LFM_KEY}&limit=20&format=json`;
+    const ar = await fetch(aUrl).then(res=>res.json());
+    const aList = document.getElementById('lfm-artists-list');
+    if (ar.topartists && ar.topartists.artist) {
+      const arr = Array.isArray(ar.topartists.artist) ? ar.topartists.artist : [ar.topartists.artist];
+      aList.innerHTML = arr.map((a, i) => `
+        <li class="artist-item">
+          <span class="rank">#${i+1}</span>
+          <div class="artist-main">
+            <div class="artist-title-row"><span class="artist-name">${esc(a.name)}</span></div>
+            <div class="artist-meta-row">${metaEl('Scrobbel-Zahl', a.playcount)}</div>
+          </div>
+        </li>`).join('');
+    } else { aList.innerHTML = '<li class="artist-item">Keine Daten gefunden</li>'; }
+  } catch(e) { showError('Last.fm Ladefehler: ' + e.message); }
+  finally { setStatus(''); }
+}
+
+// BACKUP-FILE IMPORT LOGIC
+let importTracks = [];
+let importArtists = [];
+
+function handleImport(files) {
+  if (!files.length) return;
+  setStatus('Lese Backup-Dateien…');
+  let loadedCount = 0;
+  
+  const trackCounts = {};
+  const artistCounts = {};
+
+  for (let i = 0; i < files.length; i++) {
+    const r = new FileReader();
+    r.onload = function(e) {
+      try {
+        const arr = JSON.parse(e.target.result);
+        if (Array.isArray(arr)) {
+          arr.forEach(item => {
+            const ms = item.ms_played || item.msPlayed || 0;
+            if (ms < 10000) return; // Überspringe Skips (<10s)
+            
+            const tName = item.master_metadata_track_name || item.trackName;
+            const aName = item.master_metadata_album_artist_name || item.artistName;
+            
+            if (tName && aName) {
+              const tk = `${tName} // ${aName}`;
+              trackCounts[tk] = (trackCounts[tk] || 0) + 1;
+              artistCounts[aName] = (artistCounts[aName] || 0) + 1;
+            }
+          });
+        }
+      } catch(err){}
+      loadedCount++;
+      if (loadedCount === files.length) {
+        processImportResults(trackCounts, artistCounts);
+      }
+    };
+    r.readAsText(files[i]);
+  }
+}
+
+function processImportResults(tc, ac) {
+  importTracks = Object.entries(tc).map(([k, count]) => {
+    const [name, artist] = k.split(' // ');
+    return { name, artist, count };
+  }).sort((a,b)=>b.count - a.count).slice(0, 30);
+
+  importArtists = Object.entries(ac).map(([name, count]) => {
+    return { name, count };
+  }).sort((a,b)=>b.count - a.count).slice(0, 30);
+
+  const stats = document.getElementById('import-stats');
+  stats.style.display = 'block';
+  stats.innerHTML = `Erfolgreich eingelesen: <span>${importTracks.length} einzigartige Songs</span> & <span>${importArtists.length} Künstler</span> extrahiert.`;
+
+  document.getElementById('import-tracks-list').innerHTML = importTracks.map((t, i) => `
+    <li class="track-item">
+      <span class="rank">#${i+1}</span>
+      <div class="track-main">
+        <div class="track-title-row"><span class="track-name">${esc(t.name)}</span><span class="track-artist">${esc(t.artist)}</span></div>
+        <div class="track-meta-row">${metaEl('Wiedergaben (History)', t.count)}</div>
+      </div>
+    </li>`).join('');
+
+  document.getElementById('import-artists-list').innerHTML = importArtists.map((a, i) => `
+    <li class="artist-item">
+      <span class="rank">#${i+1}</span>
+      <div class="artist-main">
+        <div class="artist-title-row"><span class="artist-name">${esc(a.name)}</span></div>
+        <div class="artist-meta-row">${metaEl('Wiedergaben (History)', a.count)}</div>
+      </div>
+    </li>`).join('');
+    
+  setStatus('');
+}
+
+// CRYPTO HELPERS (PKCE-Auth-Flow)
+function generateCodeVerifier() {
+  const arr = new Uint8Array(44);
+  window.crypto.getRandomValues(arr);
+  return b64u(arr);
+}
+async function generateCodeChallenge(verifier) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await window.crypto.subtle.digest('SHA-256', data);
+  return b64u(new Uint8Array(digest));
+}
+function b64u(buf) {
+  return btoa(String.fromCharCode(...buf)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
