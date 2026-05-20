@@ -168,10 +168,38 @@
   }
   .genre-item:last-child { border-bottom: none; }
   .genre-name { flex: 0 0 220px; color: var(--text); font-size: 12px; padding-right: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .genre-source { font-size: 9px; color: var(--dim); padding-right: 12px; flex-shrink: 0; }
-  .genre-bar-wrap { flex: 1; background: var(--line); height: 2px; margin-right: 16px; }
+  .genre-source { font-size: 9px; padding-right: 12px; flex-shrink: 0; }
+  .genre-source.src-sp  { color: var(--accent); }
+  .genre-source.src-lfm { color: var(--accent2); }
+  .genre-source.src-mb  { color: #7c6fff; }
+  .genre-source.src-all { color: var(--accent3); }
+  .genre-bar-wrap { flex: 1; background: var(--line); height: 2px; margin-right: 16px; position: relative; }
   .genre-bar { display: block; height: 100%; background: var(--accent); min-width: 2px; }
   .genre-score { color: var(--dim); font-size: 10px; width: 36px; text-align: right; flex-shrink: 0; }
+
+  /* SOURCE LEGEND */
+  .source-legend {
+    display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap;
+    font-size: 10px; letter-spacing: 0.1em;
+  }
+  .src-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+  /* GENRE SHAPE */
+  #genre-shape-section {
+    margin-bottom: 36px; padding: 24px; border: 1px solid var(--line); background: var(--bg2);
+  }
+  .shape-header {
+    font-size: 10px; letter-spacing: 0.3em; color: var(--dim); text-transform: uppercase;
+    margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .shape-wrap { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+  #shape-canvas { flex-shrink: 0; }
+  .shape-legend { flex: 1; min-width: 200px; }
+  .shape-legend-title { font-size: 10px; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px; }
+  .shape-trait { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .shape-trait:last-child { border-bottom: none; }
+  .trait-label { font-size: 11px; color: var(--mid); }
+  .trait-value { font-size: 11px; color: var(--text); text-align: right; max-width: 55%; }
 
   /* LAST.FM */
   .lfm-input-row { display: flex; gap: 10px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
@@ -274,7 +302,31 @@
 
       <!-- GENRES -->
       <div id="section-genres" style="display:none">
-        <div class="section-header">Top Genres <span class="badge lfm">LFM</span> + Spotify</div>
+        <div class="section-header">Top Genres <span class="badge lfm">LFM</span> <span class="badge mb">MB</span> + Spotify</div>
+
+        <!-- GENRE SHAPE -->
+        <div id="genre-shape-section">
+          <div class="shape-header">
+            <span>Dein Klang-Profil</span>
+            <span id="shape-status" style="font-size:9px;color:var(--dim)">Wird berechnet…</span>
+          </div>
+          <div class="shape-wrap">
+            <canvas id="shape-canvas" width="220" height="220"></canvas>
+            <div class="shape-legend">
+              <div class="shape-legend-title">Form-Bedeutung</div>
+              <div id="shape-traits"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOURCE LEGEND -->
+        <div class="source-legend">
+          <span><span class="src-dot" style="background:var(--accent)"></span>Spotify</span>
+          <span><span class="src-dot" style="background:var(--accent2)"></span>Last.fm</span>
+          <span><span class="src-dot" style="background:#7c6fff"></span>MusicBrainz</span>
+          <span><span class="src-dot" style="background:var(--accent3)"></span>Alle 3 Quellen</span>
+        </div>
+
         <ul class="genre-list" id="genres-list"></ul>
       </div>
 
@@ -475,14 +527,12 @@ async function loadAll() {
     cachedArtists = artists.items;
     renderTracks(tracks.items);
     renderArtists(artists.items);
-    // Spotify genres sofort rendern (ohne leeres prebuilt-Array)
-    buildGenresFromSpotify(artists.items);
     setStatus('');
-    // Enrich with MusicBrainz in background
+    // Enrichment parallel
     enrichTracksMB(tracks.items);
     enrichArtistsMB(artists.items);
-    // Last.fm tags für Genres (schnell, kein Rate-Limit-Problem)
-    buildGenresLfm(artists.items);
+    // Genres aus allen 3 Quellen (Spotify + Last.fm + MusicBrainz)
+    buildAllGenres(artists.items);
   } catch(e) { setStatus(''); showError(e.message); }
 }
 
@@ -583,41 +633,69 @@ async function enrichArtistsMB(artists) {
   }
 }
 
-// Sofortige Genre-Anzeige aus Spotify-Daten
+// ═══════════════════════════════════════════════════════════════
+// GENRE ENGINE — 3 SOURCES PARALLEL
+// ═══════════════════════════════════════════════════════════════
+
+// Global genre map: { genreName: { score, sources: Set } }
+let globalGenreMap = {};
+
+function mergeGenre(map, name, score, source) {
+  const n = name.toLowerCase().trim();
+  if (!n || n.length < 2) return;
+  // Spam-Filter
+  const SPAM = new Set(['seen live','favorite','favourites','love','00s','90s','80s','70s',
+    '60s','under 2000 listeners','all','other','misc','music','songs','albums','good']);
+  if (SPAM.has(n)) return;
+  if (!map[n]) map[n] = { score: 0, sources: new Set() };
+  map[n].score += score;
+  map[n].sources.add(source);
+}
+
+function genreEntries(map) {
+  return Object.entries(map)
+    .map(([g, v]) => [g, v])
+    .sort((a, b) => b[1].score - a[1].score)
+    .slice(0, 60);
+}
+
+function sourceClass(sources) {
+  const s = sources;
+  const all = s.has('spotify') && s.has('lfm') && s.has('mb');
+  if (all) return 'src-all';
+  if (s.has('lfm') && s.has('mb')) return 'src-mb';
+  if (s.has('spotify') && s.has('lfm')) return 'src-lfm';
+  if (s.has('mb')) return 'src-mb';
+  if (s.has('lfm')) return 'src-lfm';
+  return 'src-sp';
+}
+
+function sourceLabel(sources) {
+  const parts = [];
+  if (sources.has('spotify')) parts.push('SP');
+  if (sources.has('lfm'))     parts.push('LFM');
+  if (sources.has('mb'))      parts.push('MB');
+  return parts.join('+');
+}
+
+// Sofortiger Spotify-Pass
 function buildGenresFromSpotify(artists) {
-  const map = {};
+  globalGenreMap = {};
   artists.forEach((a, i) => {
     const w = artists.length - i;
-    (a.genres || []).forEach(g => {
-      if (!map[g]) map[g] = { score: 0, source: 'spotify' };
-      map[g].score += w;
-    });
+    (a.genres || []).forEach(g => mergeGenre(globalGenreMap, g, w * 3, 'spotify'));
   });
-  const entries = Object.entries(map).sort((a,b) => b[1].score - a[1].score).slice(0, 60);
-  if (entries.length) {
-    renderGenres(null, entries);
-  } else {
-    // Keine Spotify-Genres → Placeholder zeigen bis Last.fm lädt
+  const entries = genreEntries(globalGenreMap);
+  if (entries.length) renderGenres(null, entries);
+  else {
     document.getElementById('genres-list').innerHTML =
-      '<li style="color:var(--dim);padding:12px 0;font-size:11px">Lade Genres via Last.fm…</li>';
+      '<li style="color:var(--dim);padding:12px 0;font-size:11px">Lade Genres…</li>';
   }
 }
 
-// Genres über Last.fm Artist Tags — schnell und zuverlässig
+// Last.fm Tags — parallel in Batches
 async function buildGenresLfm(artists) {
-  const genreMap = {};
-
-  // Erst Spotify-Genres übernehmen
-  artists.forEach((a, i) => {
-    const w = artists.length - i;
-    (a.genres || []).forEach(g => {
-      if (!genreMap[g]) genreMap[g] = { score: 0, source: 'spotify' };
-      genreMap[g].score += w;
-    });
-  });
-
-  // Dann Last.fm Tags parallel laden (je 5 gleichzeitig)
-  const BATCH = 5;
+  const BATCH = 6;
   for (let i = 0; i < Math.min(artists.length, 30); i += BATCH) {
     const batch = artists.slice(i, i + BATCH);
     await Promise.all(batch.map(async (a, bi) => {
@@ -629,22 +707,204 @@ async function buildGenresLfm(artists) {
         if (!resp.ok) return;
         const data = await resp.json();
         const tags = (data.toptags && data.toptags.tag) || [];
-        // Nur Tags mit count > 20 (sehr klare Genre-Tags)
-        tags.filter(t => Number(t.count) > 20).slice(0, 6).forEach(t => {
-          const name = t.name.toLowerCase();
-          // Spam-Tags ausfiltern
-          if (['seen live','favorite','favourites','love','00s','90s','80s','70s','under 2000 listeners'].includes(name)) return;
-          if (!genreMap[name]) genreMap[name] = { score: 0, source: 'lfm' };
-          else if (genreMap[name].source === 'spotify') genreMap[name].source = 'both';
-          else if (genreMap[name].source === 'lfm') genreMap[name].source = 'lfm';
-          genreMap[name].score += Math.round(w * (Number(t.count) / 100));
+        tags.filter(t => Number(t.count) > 15).slice(0, 8).forEach(t => {
+          mergeGenre(globalGenreMap, t.name, Math.round(w * (Number(t.count) / 80)), 'lfm');
         });
-      } catch(e) { /* skip */ }
+      } catch(e) {}
     }));
-    // Nach jedem Batch Genre-Liste aktualisieren
-    const sorted = Object.entries(genreMap).sort((a,b) => b[1].score - a[1].score).slice(0, 60);
-    if (sorted.length) renderGenres(null, sorted);
+    renderGenres(null, genreEntries(globalGenreMap));
   }
+}
+
+// MusicBrainz Tags — sequentiell mit 220ms Delay
+async function buildGenresMB(artists) {
+  for (let i = 0; i < Math.min(artists.length, 20); i++) {
+    const a = artists[i];
+    const w = artists.length - i;
+    try {
+      await sleep(220);
+      let mb = mbArtistCache[a.name];
+      if (!mb) mb = await mbSearchArtist(a.name);
+      if (!mb) continue;
+      const tags = [...(mb.genres || []), ...(mb.tags || []).filter(t => t.count > 0)];
+      tags.forEach(t => {
+        mergeGenre(globalGenreMap, t.name, Math.round(w * Math.min(t.count || 1, 6)), 'mb');
+      });
+      renderGenres(null, genreEntries(globalGenreMap));
+    } catch(e) {}
+  }
+  // Alle 3 Quellen fertig → Shape zeichnen
+  drawGenreShape(genreEntries(globalGenreMap));
+}
+
+// Hauptfunktion: alle 3 Quellen starten
+async function buildAllGenres(artists) {
+  globalGenreMap = {};
+  buildGenresFromSpotify(artists);
+  // LFM und MB parallel starten (MB dauert länger)
+  await Promise.all([
+    buildGenresLfm(artists),
+    buildGenresMB(artists),
+  ]);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GENRE SHAPE — Geometrische Klang-Visualisierung
+// ═══════════════════════════════════════════════════════════════
+
+/*  BEDEUTUNGSSYSTEM:
+    Anzahl Ecken  → Breite des Musikgeschmacks
+      3 Ecken  = sehr fokussiert / eine Szene
+      5 Ecken  = ausgewogen / Allrounder
+      8+ Ecken = extrem vielfältig / eklektisch
+
+    Größe der Form → Intensität / wie dominant die Top-Genres sind
+      klein = viele gleichwertige Genres
+      groß  = ein oder zwei Genres dominieren alles
+
+    Unregelmäßigkeit → Originalität / Nischigkeit
+      perfekt symmetrisch = Mainstream
+      stark verzerrt      = sehr nischig / ungewöhnlicher Geschmack
+
+    Füll-Transparenz → Konsistenz
+      opak    = konsistenter, kohärenter Geschmack
+      dünn    = viel Variation, experimentell
+
+    Farbe → Energie
+      Grün (Spotify)  = Pop / Electronic / Dance-lastig
+      Rot (LFM)       = Rock / Metal / Indie-lastig
+      Lila (MB)       = Classical / Jazz / World-lastig
+      Gold (gemischt) = echter Genre-Mix
+*/
+
+function drawGenreShape(entries) {
+  const canvas = document.getElementById('shape-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  if (!entries || entries.length < 3) {
+    document.getElementById('shape-status').textContent = 'Zu wenige Genres.';
+    return;
+  }
+
+  const top = entries.slice(0, 12);
+  const totalScore = top.reduce((s, [, v]) => s + v.score, 0);
+  const maxScore = top[0][1].score;
+
+  // ── ANZAHL ECKEN: basierend auf Genre-Diversität (HHI-Index)
+  const hhi = top.reduce((s, [, v]) => s + Math.pow(v.score / totalScore, 2), 0);
+  // hhi nahe 1 = monopol (wenig Genres), nahe 0 = sehr divers
+  const sides = Math.round(3 + (1 - hhi) * 9); // 3 bis 12
+
+  // ── GRÖSSE: wie dominant ist das Top-Genre
+  const dominance = maxScore / totalScore; // 0..1
+  const baseR = 50 + dominance * 50; // 50..100px
+
+  // ── UNREGELMÄSSIGKEIT: Nischen-Score (wie viele Genres haben nur 1 Quelle)
+  const nicheRatio = top.filter(([, v]) => v.sources.size === 1).length / top.length;
+  const irregularity = nicheRatio * 0.45; // max 45% Verformung
+
+  // ── FARBE: welche Quellen dominieren
+  let spScore = 0, lfmScore = 0, mbScore = 0;
+  top.forEach(([, v]) => {
+    if (v.sources.has('spotify')) spScore += v.score;
+    if (v.sources.has('lfm'))     lfmScore += v.score;
+    if (v.sources.has('mb'))      mbScore  += v.score;
+  });
+  const srcTotal = spScore + lfmScore + mbScore;
+  const spW = spScore / srcTotal, lfmW = lfmScore / srcTotal, mbW = mbScore / srcTotal;
+  // Mische Farben
+  const r = Math.round(0x1d * spW + 0xd5 * lfmW + 0x7c * mbW);
+  const g = Math.round(0xb9 * spW + 0x10 * lfmW + 0x6f * mbW);
+  const b = Math.round(0x54 * spW + 0x07 * lfmW + 0xff * mbW);
+  const shapeColor = `rgb(${r},${g},${b})`;
+
+  // ── TRANSPARENZ: Konsistenz = Anteil Genres mit 2+ Quellen
+  const consistency = top.filter(([, v]) => v.sources.size >= 2).length / top.length;
+  const alpha = 0.12 + consistency * 0.25;
+
+  // ── PUNKTE BERECHNEN
+  const cx = W / 2, cy = H / 2;
+  // Seed aus Genre-Namen für reproduzierbare Verformung
+  const seed = top.map(([g]) => g.charCodeAt(0) || 0).reduce((a, b) => a + b, 0);
+  const pts = [];
+  for (let i = 0; i < sides; i++) {
+    const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
+    // Verformung: pseudo-random aber deterministisch
+    const noise = irregularity * Math.sin((seed + i * 137.5) * 0.1) ;
+    const r2 = baseR * (1 + noise);
+    pts.push({ x: cx + r2 * Math.cos(angle), y: cy + r2 * Math.sin(angle) });
+  }
+
+  // ── ZEICHNEN: Hintergrund-Gitter
+  ctx.strokeStyle = '#1e1e1e';
+  ctx.lineWidth = 1;
+  for (let ring = 1; ring <= 3; ring++) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, (baseR * ring) / 3 + 10, 0, 2 * Math.PI);
+    ctx.stroke();
+  }
+
+  // ── ZEICHNEN: Achsen
+  ctx.strokeStyle = '#222';
+  for (let i = 0; i < sides; i++) {
+    const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + (baseR + 16) * Math.cos(angle), cy + (baseR + 16) * Math.sin(angle));
+    ctx.stroke();
+  }
+
+  // ── ZEICHNEN: Gefüllte Form
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.closePath();
+  ctx.fillStyle = shapeColor.replace('rgb', 'rgba').replace(')', `,${alpha})`);
+  ctx.fill();
+  ctx.strokeStyle = shapeColor;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // ── ZEICHNEN: Punkte an Ecken mit Genre-Labels
+  pts.forEach((p, i) => {
+    if (!top[i]) return;
+    const [genre] = top[i];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = shapeColor;
+    ctx.fill();
+    // Label
+    ctx.font = '9px Courier New';
+    ctx.fillStyle = '#555';
+    const lx = cx + (baseR + 26) * Math.cos((2 * Math.PI * i / sides) - Math.PI / 2);
+    const ly = cy + (baseR + 26) * Math.sin((2 * Math.PI * i / sides) - Math.PI / 2);
+    ctx.textAlign = lx > cx + 5 ? 'left' : lx < cx - 5 ? 'right' : 'center';
+    ctx.fillText(genre.length > 12 ? genre.slice(0, 11) + '…' : genre, lx, ly + 3);
+  });
+
+  // ── TRAITS BESCHREIBEN
+  const diversityLabel = sides <= 4 ? 'Sehr fokussiert' : sides <= 6 ? 'Ausgewogen' : sides <= 9 ? 'Vielfältig' : 'Eklektisch';
+  const intensityLabel = dominance > 0.4 ? 'Ein Genre dominiert' : dominance > 0.25 ? 'Klarer Schwerpunkt' : 'Gleichmäßig verteilt';
+  const nicheLabel = nicheRatio > 0.7 ? 'Sehr nischig' : nicheRatio > 0.4 ? 'Teils nischig' : 'Mainstreamaffin';
+  const consistencyLabel = consistency > 0.6 ? 'Kohärent & treu' : consistency > 0.3 ? 'Variabel' : 'Experimentell';
+  const topGenreNames = top.slice(0, 3).map(([g]) => g).join(', ');
+
+  document.getElementById('shape-traits').innerHTML = [
+    ['Ecken', `${sides} — ${diversityLabel}`],
+    ['Dominanz', intensityLabel],
+    ['Nischigkeit', nicheLabel],
+    ['Konsistenz', consistencyLabel],
+    ['Top-Genres', topGenreNames],
+  ].map(([l, v]) => `
+    <div class="shape-trait">
+      <span class="trait-label">${l}</span>
+      <span class="trait-value">${v}</span>
+    </div>`).join('');
+
+  document.getElementById('shape-status').textContent = `${sides}-Eck · ${top.length} Genres analysiert`;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -757,32 +1017,27 @@ function renderArtists(items) {
     </li>`).join('');
 }
 
-function renderGenres(artistItems, prebuilt) {
+function renderGenres(artistItems, entries) {
   const list = document.getElementById('genres-list');
-  let entries = prebuilt;
-
-  if (artistItems && !prebuilt.length) {
-    // Quick render from Spotify only
-    const map = {};
-    artistItems.forEach((a, i) => {
-      const w = artistItems.length - i;
-      (a.genres||[]).forEach(g => { map[g] = (map[g]||0) + w; });
-    });
-    entries = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,60).map(([g,s])=>([g,{score:s,source:'spotify'}]));
-  }
 
   if (!entries || !entries.length) { list.innerHTML = emptyRow(); return; }
-  const max = entries[0][1].score || entries[0][1];
+  const max = entries[0][1].score;
   list.innerHTML = entries.map(([genre, val], i) => {
-    const score  = typeof val === 'object' ? val.score  : val;
-    const source = typeof val === 'object' ? val.source : 'spotify';
-    const pct    = Math.round((score / max) * 100);
-    const srcLabel = source === 'both' ? 'SP+LFM' : source === 'lfm' ? 'LFM' : 'SP';
+    const score   = val.score;
+    const sources = val.sources instanceof Set ? val.sources : new Set([val.source || 'spotify']);
+    const pct     = Math.round((score / max) * 100);
+    const cls     = sourceClass(sources);
+    const lbl     = sourceLabel(sources);
+    // Bar color per source
+    const barColor = cls === 'src-all' ? 'var(--accent3)'
+                   : cls === 'src-mb'  ? '#7c6fff'
+                   : cls === 'src-lfm' ? 'var(--accent2)'
+                   : 'var(--accent)';
     return `<li class="genre-item">
       <span class="rank">${pad(i+1)}</span>
       <span class="genre-name">${esc(genre)}</span>
-      <span class="genre-source">${srcLabel}</span>
-      <span class="genre-bar-wrap"><span class="genre-bar" style="width:${pct}%"></span></span>
+      <span class="genre-source ${cls}">${lbl}</span>
+      <span class="genre-bar-wrap"><span class="genre-bar" style="width:${pct}%;background:${barColor}"></span></span>
       <span class="genre-score">${score}</span>
     </li>`;
   }).join('');
